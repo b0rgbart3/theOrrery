@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/astronomy/scale.ts","./src/data/planets.ts","./src/scene/camerarig.tsx","./src/scene/orbitpath.tsx","./src/scene/planet.tsx","./src/scene/solarsystem.tsx","./src/scene/sun.tsx"],"version":"5.9.3"}

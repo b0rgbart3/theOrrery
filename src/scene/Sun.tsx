@@ -1,22 +1,36 @@
 import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import type { Mesh } from "three";
+import { SUN_RADIUS } from "../astronomy/scale";
 
-const SUN_RADIUS = 4;
+// Sidereal rotation period at the Sun's equator (it rotates faster at the
+// equator than near the poles, but a single rate is enough for this model).
+const SUN_ROTATION_PERIOD_HOURS = 609.12;
 
-export function Sun() {
+interface SunProps {
+  onFocus: () => void;
+}
+
+export function Sun({ onFocus }: SunProps) {
   const meshRef = useRef<Mesh>(null);
   const texture = useTexture("/textures/sun.jpg");
 
-  useFrame((_, delta) => {
+  useFrame(() => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.02;
+      const hoursSinceEpoch = Date.now() / 3_600_000;
+      const phase = (hoursSinceEpoch / SUN_ROTATION_PERIOD_HOURS) % 1;
+      meshRef.current.rotation.y = phase * Math.PI * 2;
     }
   });
 
+  function handleClick(event: ThreeEvent<MouseEvent>) {
+    event.stopPropagation();
+    onFocus();
+  }
+
   return (
-    <mesh ref={meshRef}>
+    <mesh ref={meshRef} onClick={handleClick}>
       <sphereGeometry args={[SUN_RADIUS, 64, 64]} />
       <meshBasicMaterial map={texture} />
     </mesh>

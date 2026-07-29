@@ -55,9 +55,9 @@ Planet/Sun textures live in `public/textures/` and are sourced from
 Built in stages:
 
 1. ✅ Sun only — textured sphere, subtle bloom, basic orbit controls.
-2. All 8 planets at a fixed layout, compromise scale, orbit rings, click-to-focus camera.
-3. Real planet positions via `astronomy-engine`'s `HelioVector`.
-4. Scrubbable/playable timeline driving those positions.
-5. Real (elliptical) orbit paths sampled over each planet's actual orbital period.
-6. Polish — labels, starfield, Earth's Moon, per-planet axial tilt.
+2. ✅ All 8 planets at a fixed layout, compromise scale, orbit rings, click-to-focus camera.
+3. ✅ Real planet positions via `astronomy-engine`'s `HelioVector`, computed for "now" at page load.
+4. Scrubbable/playable timeline driving those positions continuously (not yet — positions are a snapshot of load time).
+5. ✅ Real (elliptical) orbit paths sampled over each planet's actual orbital period.
+6. Polish — starfield ✅, per-planet axial tilt ✅, click tooltips with real facts ✅, Saturn's ring ✅, real sidereal self-rotation ✅. Still open: Earth's Moon.
 7. Real-time ISS tracking (low priority) — the first feature that will need a backend.
