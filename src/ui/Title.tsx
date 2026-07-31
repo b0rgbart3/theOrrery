@@ -1,8 +1,12 @@
 import "./Title.scss";
 
-export function Title() {
+interface TitleProps {
+  onClick: () => void;
+}
+
+export function Title({ onClick }: TitleProps) {
   return (
-    <h1 className="title">
+    <h1 className="title" onClick={onClick}>
       The <span className="title__initial">O</span>rrery
     </h1>
   );

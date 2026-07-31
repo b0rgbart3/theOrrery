@@ -1,0 +1,44 @@
+.planet-name-label {
+  position: relative;
+  pointer-events: none;
+
+  &__dot {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #e9d9b6;
+    box-shadow: 0 0 4px rgba(233, 217, 182, 0.8);
+  }
+
+  &__line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 58px;
+    height: 1px;
+    background: linear-gradient(to right, rgba(233, 217, 182, 0.05), rgba(233, 217, 182, 0.55));
+    transform-origin: 0 0;
+    transform: rotate(-38deg);
+  }
+
+  &__text {
+    position: absolute;
+    top: -36px;
+    left: 48px;
+    white-space: nowrap;
+    transform: translateY(-100%);
+
+    font-family: "Cinzel", "Times New Roman", serif;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #e9d9b6;
+    text-shadow:
+      0 0 10px #000000,
+      0 0 6px rgba(233, 217, 182, 0.35);
+  }
+}

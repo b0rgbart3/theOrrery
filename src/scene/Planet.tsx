@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
+import { Line, useTexture } from "@react-three/drei";
 import type { Group, Mesh } from "three";
 import { radiusKmToScene } from "../astronomy/scale";
 import { heliocentricScenePosition } from "../astronomy/ephemeris";
@@ -11,9 +11,10 @@ import { PlanetRing } from "./PlanetRing";
 interface PlanetProps {
   data: PlanetData;
   onFocus: (radius: number) => void;
+  showAxisLine: boolean;
 }
 
-export function Planet({ data, onFocus }: PlanetProps) {
+export function Planet({ data, onFocus, showAxisLine }: PlanetProps) {
   const groupRef = useRef<Group>(null);
   const meshRef = useRef<Mesh>(null);
   const texture = useTexture(data.texture);
@@ -50,6 +51,18 @@ export function Planet({ data, onFocus }: PlanetProps) {
           <sphereGeometry args={[radius, 48, 48]} />
           <meshStandardMaterial map={texture} roughness={1} />
         </mesh>
+        {showAxisLine && (
+          <Line
+            points={[
+              [0, radius * 1.4, 0],
+              [0, -radius * 1.4, 0],
+            ]}
+            color="gray"
+            transparent
+            opacity={0.6}
+            lineWidth={1}
+          />
+        )}
         {data.ring && (
           <PlanetRing
             innerRadius={radius * data.ring.innerRadiusFactor}

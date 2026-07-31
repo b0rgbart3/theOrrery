@@ -23,3 +23,10 @@ export const SUN_FACTS: Fact[] = [
   { label: "Radius", value: "696,000 km" },
   { label: "Surface temp.", value: "~5,500 °C" },
 ];
+
+export const MOON_FACTS: Fact[] = [
+  { label: "Radius", value: "1,737.4 km" },
+  { label: "Distance from Earth", value: "384,400 km (avg)" },
+  { label: "Orbital period", value: "27.3 days" },
+  { label: "Axial tilt", value: "6.7° (to its orbit)" },
+];

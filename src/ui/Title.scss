@@ -4,7 +4,7 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  pointer-events: none;
+  cursor: pointer;
 
   font-family: "Cinzel", "Times New Roman", serif;
   font-weight: 600;
@@ -15,6 +15,7 @@
 
   color: #e9d9b6;
   text-shadow:
+    0 0 20px #000000,
     0 0 12px rgba(233, 217, 182, 0.35),
     0 0 2px rgba(255, 255, 255, 0.4);
 

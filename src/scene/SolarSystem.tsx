@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { Sun } from "./Sun";
 import { Planet } from "./Planet";
+import { Moon } from "./Moon";
 import { OrbitPath } from "./OrbitPath";
 import { CameraRig } from "./CameraRig";
 import { PlanetLabel } from "./PlanetLabel";
+import { PlanetNameLabel } from "./PlanetNameLabel";
 import { TimeDriver } from "./TimeDriver";
 import { PLANETS, type PlanetData } from "../data/planets";
-import { auToScene, SUN_RADIUS } from "../astronomy/scale";
-import { planetFacts, SUN_FACTS } from "../data/facts";
+import { MOON } from "../data/moon";
+import { auToScene, radiusKmToScene, SUN_RADIUS } from "../astronomy/scale";
+import { heliocentricScenePosition, moonScenePosition, moonSceneOffsetFromEarth } from "../astronomy/ephemeris";
+import { planetFacts, SUN_FACTS, MOON_FACTS } from "../data/facts";
 import { useTimeStore } from "../state/timeStore";
 import type { Selection } from "./selection";
 import type { OrbitDisplayMode, OrbitVariant } from "./orbitDisplay";
@@ -32,9 +36,17 @@ interface SolarSystemProps {
   selection: Selection | null;
   onSelect: (selection: Selection | null) => void;
   orbitMode: OrbitDisplayMode;
+  showAxisLine: boolean;
+  showPlanetLabels: boolean;
 }
 
-export function SolarSystem({ selection, onSelect, orbitMode }: SolarSystemProps) {
+export function SolarSystem({
+  selection,
+  onSelect,
+  orbitMode,
+  showAxisLine,
+  showPlanetLabels,
+}: SolarSystemProps) {
   // A fixed anchor purely for sampling each orbit's elliptical shape (orbital
   // elements barely change on human timescales) — NOT the moving simulation
   // clock, so orbit-path geometry isn't recomputed every frame.
@@ -91,7 +103,14 @@ export function SolarSystem({ selection, onSelect, orbitMode }: SolarSystemProps
                 variant={variant}
               />
             )}
-            <Planet data={planet} onFocus={(radius) => selectPlanet(planet, radius)} />
+            <Planet
+              data={planet}
+              onFocus={(radius) => selectPlanet(planet, radius)}
+              showAxisLine={showAxisLine}
+            />
+            {showPlanetLabels && (
+              <PlanetNameLabel planetName={planet.name} radius={radiusKmToScene(planet.radiusKm)} />
+            )}
           </group>
         );
       })}

@@ -8,10 +8,14 @@ import type { Selection } from "./scene/selection";
 import type { OrbitDisplayMode } from "./scene/orbitDisplay";
 import { Timeline } from "./ui/Timeline";
 import { Title } from "./ui/Title";
+import { InfoPanel } from "./ui/InfoPanel";
 
 export default function App() {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [orbitMode, setOrbitMode] = useState<OrbitDisplayMode>("regular");
+  const [showAxisLine, setShowAxisLine] = useState(true);
+  const [showPlanetLabels, setShowPlanetLabels] = useState(true);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   return (
     <>
@@ -19,12 +23,26 @@ export default function App() {
         <color attach="background" args={["#000005"]} />
         <Stars radius={400} depth={100} count={6000} factor={10} saturation={0} fade />
         <ViewportShift />
-        <SolarSystem selection={selection} onSelect={setSelection} orbitMode={orbitMode} />
+        <SolarSystem
+          selection={selection}
+          onSelect={setSelection}
+          orbitMode={orbitMode}
+          showAxisLine={showAxisLine}
+          showPlanetLabels={showPlanetLabels}
+        />
         <EffectComposer>
           <Bloom intensity={0.5} luminanceThreshold={0.4} luminanceSmoothing={0.2} mipmapBlur />
         </EffectComposer>
       </Canvas>
-      <Title />
+      <Title onClick={() => setAboutOpen(true)} />
+      <InfoPanel
+        showAxisLine={showAxisLine}
+        onShowAxisLineChange={setShowAxisLine}
+        showPlanetLabels={showPlanetLabels}
+        onShowPlanetLabelsChange={setShowPlanetLabels}
+        aboutOpen={aboutOpen}
+        onAboutOpenChange={setAboutOpen}
+      />
       <Timeline orbitMode={orbitMode} onOrbitModeChange={setOrbitMode} />
     </>
   );
