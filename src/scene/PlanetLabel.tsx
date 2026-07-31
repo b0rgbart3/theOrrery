@@ -45,6 +45,7 @@ export function PlanetLabel({ selectionKey, radius, name, facts, onClose }: Plan
               onClose();
             }}
             aria-label="Close"
+          >
             ×
           </button>
           <h3>{name}</h3>
