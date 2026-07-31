@@ -1,15 +1,16 @@
-import { useMemo } from "react";
-import { Vector3 } from "three";
+import { useEffect, useMemo, useState } from "react";
 import { Sun } from "./Sun";
 import { Planet } from "./Planet";
 import { OrbitPath } from "./OrbitPath";
 import { CameraRig } from "./CameraRig";
 import { PlanetLabel } from "./PlanetLabel";
+import { TimeDriver } from "./TimeDriver";
 import { PLANETS, type PlanetData } from "../data/planets";
 import { auToScene, SUN_RADIUS } from "../astronomy/scale";
-import { heliocentricScenePosition } from "../astronomy/ephemeris";
 import { planetFacts, SUN_FACTS } from "../data/facts";
+import { useTimeStore } from "../state/timeStore";
 import type { Selection } from "./selection";
+import type { OrbitDisplayMode, OrbitVariant } from "./orbitDisplay";
 
 // Comfortably larger than the outermost orbit (Neptune) so the default,
 // nothing-selected view frames the whole system rather than the tighter
@@ -30,57 +31,84 @@ function bodyMinDistance(radius: number): number {
 interface SolarSystemProps {
   selection: Selection | null;
   onSelect: (selection: Selection | null) => void;
+  orbitMode: OrbitDisplayMode;
 }
 
-export function SolarSystem({ selection, onSelect }: SolarSystemProps) {
-  const now = useMemo(() => new Date(), []);
+export function SolarSystem({ selection, onSelect, orbitMode }: SolarSystemProps) {
+  // A fixed anchor purely for sampling each orbit's elliptical shape (orbital
+  // elements barely change on human timescales) — NOT the moving simulation
+  // clock, so orbit-path geometry isn't recomputed every frame.
+  const orbitShapeReferenceDate = useMemo(() => new Date(), []);
+
+  // The tooltip's facts are static, but its screen anchor tracks the body's
+  // live position — while playing or actively scrubbing that anchor is
+  // constantly moving, which reads as jittery, so hide it until time is
+  // holding still.
+  const isPlaying = useTimeStore((s) => s.isPlaying);
+  const isScrubbing = useTimeStore((s) => s.isScrubbing);
+
+  // Closing the tooltip shouldn't drop the camera focus, so its visibility
+  // is tracked separately from the selection itself — dismissed here,
+  // brought back whenever a (possibly new) body is selected.
+  const [tooltipDismissed, setTooltipDismissed] = useState(false);
+  useEffect(() => {
+    setTooltipDismissed(false);
+  }, [selection?.key]);
+
+  const showTooltip = selection !== null && !isPlaying && !isScrubbing && !tooltipDismissed;
 
   function selectSun() {
-    onSelect({ key: "sun", position: new Vector3(0, 0, 0), radius: SUN_RADIUS, name: "Sun", facts: SUN_FACTS });
+    onSelect({ key: "sun", radius: SUN_RADIUS, name: "Sun", facts: SUN_FACTS });
   }
 
-  function selectPlanet(planet: PlanetData, position: [number, number, number], radius: number) {
-    onSelect({
-      key: planet.name,
-      position: new Vector3(...position),
-      radius,
-      name: planet.name,
-      facts: planetFacts(planet),
-    });
+  function selectPlanet(planet: PlanetData, radius: number) {
+    onSelect({ key: planet.name, radius, name: planet.name, facts: planetFacts(planet) });
   }
 
   return (
     <>
+      <TimeDriver />
+
       <pointLight position={[0, 0, 0]} intensity={800} decay={2} />
       <ambientLight intensity={0.1} />
 
       <Sun onFocus={selectSun} />
 
       {PLANETS.map((planet) => {
-        const position = heliocentricScenePosition(planet.name, now);
+        const isSelected = selection?.key === planet.name;
+        const showOrbit = orbitMode !== "hidden";
+        const variant: OrbitVariant =
+          orbitMode === "selected" ? (isSelected ? "bright" : "regular") : (orbitMode as OrbitVariant);
 
         return (
           <group key={planet.name}>
-            <OrbitPath planetName={planet.name} orbitalPeriodDays={planet.orbitalPeriodDays} referenceDate={now} />
-            <Planet data={planet} position={position} onFocus={(pos, radius) => selectPlanet(planet, pos, radius)} />
+            {showOrbit && (
+              <OrbitPath
+                planetName={planet.name}
+                orbitalPeriodDays={planet.orbitalPeriodDays}
+                referenceDate={orbitShapeReferenceDate}
+                color={planet.color}
+                variant={variant}
+              />
+            )}
+            <Planet data={planet} onFocus={(radius) => selectPlanet(planet, radius)} />
           </group>
         );
       })}
 
       <CameraRig
         focusKey={selection?.key ?? "overview"}
-        focusPosition={selection?.position ?? new Vector3(0, 0, 0)}
         focusDistance={selection ? bodyViewDistance(selection.radius) : OVERVIEW_DISTANCE}
         minDistance={bodyMinDistance(selection?.radius ?? SUN_RADIUS)}
       />
 
-      {selection && (
+      {showTooltip && selection && (
         <PlanetLabel
-          position={selection.position}
+          selectionKey={selection.key}
           radius={selection.radius}
           name={selection.name}
           facts={selection.facts}
-          onClose={() => onSelect(null)}
+          onClose={() => setTooltipDismissed(true)}
         />
       )}
     </>

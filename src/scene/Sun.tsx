@@ -3,6 +3,7 @@ import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import type { Mesh } from "three";
 import { SUN_RADIUS } from "../astronomy/scale";
+import { useTimeStore } from "../state/timeStore";
 
 // Sidereal rotation period at the Sun's equator (it rotates faster at the
 // equator than near the poles, but a single rate is enough for this model).
@@ -18,8 +19,8 @@ export function Sun({ onFocus }: SunProps) {
 
   useFrame(() => {
     if (meshRef.current) {
-      const hoursSinceEpoch = Date.now() / 3_600_000;
-      const phase = (hoursSinceEpoch / SUN_ROTATION_PERIOD_HOURS) % 1;
+      const simHours = useTimeStore.getState().simDate.getTime() / 3_600_000;
+      const phase = (simHours / SUN_ROTATION_PERIOD_HOURS) % 1;
       meshRef.current.rotation.y = phase * Math.PI * 2;
     }
   });

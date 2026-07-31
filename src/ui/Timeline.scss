@@ -1,0 +1,72 @@
+.timeline {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 10px;
+  background: #5f533e;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #000;
+  font-family: system-ui, sans-serif;
+  font-size: 0.8rem;
+  backdrop-filter: blur(4px);
+  z-index: 10;
+
+  button,
+  select {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: inherit;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+
+  button {
+    padding: 0.3rem 0.6rem;
+  }
+
+  button:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  select {
+    padding: 0.25rem 0.4rem;
+  }
+
+  select:focus,
+  select:focus-visible {
+    outline: none;
+  }
+
+  &__scrub {
+    width: 220px;
+    accent-color: #d1a446;
+
+    &::-webkit-slider-runnable-track {
+      background: linear-gradient(
+        to right,
+        #483d27 var(--scrub-progress, 0%),
+        #000 var(--scrub-progress, 0%)
+      );
+    }
+
+    &::-moz-range-track {
+      background: #000;
+    }
+
+    &::-moz-range-progress {
+      background: #483d27;
+    }
+  }
+
+  &__date {
+    min-width: 100px;
+    text-align: right;
+    opacity: 0.85;
+  }
+}

@@ -1,0 +1,17 @@
+import { chromium } from "playwright";
+const url = "http://localhost:5173";
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+await page.goto(url);
+await page.waitForSelector("canvas");
+await page.waitForTimeout(1500);
+const canvas = await page.$("canvas");
+const box = await canvas.boundingBox();
+const cx = box.x + box.width / 2;
+const cy = box.y + box.height / 2 - 40;
+await page.mouse.click(cx, cy);
+await page.waitForTimeout(1200);
+await canvas.screenshot({ path: "/tmp/baseline-1-selected.png" });
+await page.waitForTimeout(1800);
+await canvas.screenshot({ path: "/tmp/baseline-2-after-wait-no-click.png" });
+await browser.close();
