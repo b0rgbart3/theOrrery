@@ -1,7 +1,7 @@
 {
-  "name": "solarsystem",
+  "name": "the-orrery",
   "version": "1.0.0",
-  "description": "a 3D visualization of the solar system",
+  "description": "The Orrery — a 3D visualization of the solar system",
   "license": "ISC",
   "author": "Bart Dority (github.com/b0rgbart3)",
   "type": "module",

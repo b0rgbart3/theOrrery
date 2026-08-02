@@ -1,4 +1,4 @@
-# Solar System
+# The Orrery
 
 An interactive, planetarium-style 3D visualization of the solar system: the Sun at the center of
 orbital control, all eight planets visible on screen at once, with a single compromise scale that
