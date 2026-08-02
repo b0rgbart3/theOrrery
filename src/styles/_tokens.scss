@@ -1,0 +1,35 @@
+// Panels
+$color-bg-panel: #26211a; // solid dark-brown panel bg (Modal); also used via rgba($color-bg-panel, alpha) for translucent panels (Tooltip)
+$color-bg-overlay: rgba(0, 0, 0, 0.6); // full-screen modal scrim
+$color-bg-timeline: #5f533e;
+
+// Borders
+$color-border: rgba(233, 217, 182, 0.25); // gold-tinted panel border (Modal/Tooltip)
+$color-border-control: rgba(255, 255, 255, 0.15); // neutral chrome border (buttons/inputs/timeline)
+
+// Text
+$color-text-primary: #e9d9b6;
+$color-text-muted: rgba(233, 217, 182, 0.65);
+$color-text-on-timeline: #000;
+
+// Accent
+$color-accent: #d1a446;
+$color-underline: #6a604c;
+$color-timeline-track: #483d27;
+
+// Controls (buttons/selects shared by Modal close + Timeline)
+$color-control-bg: rgba(255, 255, 255, 0.08);
+$color-control-bg-hover: rgba(255, 255, 255, 0.16);
+
+// Glows / shadows
+$color-glow: rgba(233, 217, 182, 0.35);
+$color-glow-strong: rgba(233, 217, 182, 0.55);
+$color-glow-soft: rgba(233, 217, 182, 0.05);
+$color-glow-dot: rgba(233, 217, 182, 0.8);
+$color-glow-white: rgba(255, 255, 255, 0.4);
+$shadow-overlay: 0 0 60px rgba(0, 0, 0, 0.65); // large ambient shadow (Modal)
+$shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.5); // smaller floating-panel shadow (Tooltip)
+
+// Typography
+$font-display: "Cinzel", "Times New Roman", serif;
+$font-body: system-ui, sans-serif;

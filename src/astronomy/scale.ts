@@ -24,8 +24,31 @@ export function radiusKmToScene(km: number): number {
 // radius. This is a separate, linear (not sqrt-compressed) scale just for
 // the Earth-Moon system, so the real orbit's shape/eccentricity isn't
 // distorted, only its absolute size is shrunk to read clearly next to Earth.
-const MOON_ORBIT_SCENE_PER_AU = 660; // tuned by eye: avg. distance -> ~1.7 scene units, clear of Earth's radius + the Moon's own
+//
+// The exaggeration has to stay bounded on both sides: big enough to clear
+// Earth's own scene radius (0.63) plus the Moon's (0.17), but nowhere near
+// Earth's gap to its nearest neighboring orbit — Venus's ring sits only
+// ~1.48 scene units inside Earth's (16 - 14.5), the tightest gap of any
+// planet pair here. An earlier value (660, ~1.7 avg.) actually exceeded that
+// whole gap, making the Moon's orbit visibly cross into Venus's ring. 390
+// keeps the average at ~1.0 — comfortable clearance from Earth's own surface
+// on one side, and using well under half of the Venus gap on the other.
+const MOON_ORBIT_SCENE_PER_AU = 390;
 
 export function moonAuToScene(au: number): number {
   return MOON_ORBIT_SCENE_PER_AU * au;
+}
+
+// The Moon is the only body actually seen right next to another body at
+// close range, so its size is what makes the Earth/Moon comparison read as
+// right or wrong. Running its radius through the same cbrt(km) curve as the
+// planets (tuned to keep Mercury from vanishing next to Neptune) compresses
+// the real ~3.7x Earth/Moon ratio down to ~1.5x — next to Earth specifically,
+// that reads as an oversized moon. Scaling it as a true proportion of
+// Earth's own (already-exaggerated) scene radius instead keeps that one
+// comparison physically correct.
+const EARTH_RADIUS_KM = 6371;
+
+export function moonRadiusToScene(moonRadiusKm: number): number {
+  return radiusKmToScene(EARTH_RADIUS_KM) * (moonRadiusKm / EARTH_RADIUS_KM);
 }

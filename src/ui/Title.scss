@@ -1,3 +1,5 @@
+@use "../styles/tokens" as *;
+
 .title {
   position: fixed;
   top: calc(1.5rem - 20px);
@@ -6,21 +8,21 @@
   z-index: 10;
   cursor: pointer;
 
-  font-family: "Cinzel", "Times New Roman", serif;
+  font-family: $font-display;
   font-weight: 600;
   font-size: 2rem;
   letter-spacing: 0.35em;
   text-transform: uppercase;
   text-align: center;
 
-  color: #e9d9b6;
+  color: $color-text-primary;
   text-shadow:
     0 0 20px #000000,
-    0 0 12px rgba(233, 217, 182, 0.35),
-    0 0 2px rgba(255, 255, 255, 0.4);
+    0 0 12px $color-glow,
+    0 0 2px $color-glow-white;
 
   text-decoration: underline;
-  text-decoration-color: #6a604c;
+  text-decoration-color: $color-underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.5em;
 

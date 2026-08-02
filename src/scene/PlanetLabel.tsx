@@ -26,7 +26,7 @@ export function PlanetLabel({ selectionKey, radius, name, facts, onClose }: Plan
     if (!groupRef.current) return;
     const simDate = useTimeStore.getState().simDate;
     const [x, y, z] = scenePositionForKey(selectionKey, simDate);
-    groupRef.current.position.set(x, y + radius + 0.8, z);
+    groupRef.current.position.set(x, y + radius + 0.4, z);
   });
 
   return (

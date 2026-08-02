@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Sun } from "./Sun";
 import { Planet } from "./Planet";
 import { Moon } from "./Moon";
@@ -9,8 +9,8 @@ import { PlanetNameLabel } from "./PlanetNameLabel";
 import { TimeDriver } from "./TimeDriver";
 import { PLANETS, type PlanetData } from "../data/planets";
 import { MOON } from "../data/moon";
-import { auToScene, radiusKmToScene, SUN_RADIUS } from "../astronomy/scale";
-import { heliocentricScenePosition, moonScenePosition, moonSceneOffsetFromEarth } from "../astronomy/ephemeris";
+import { auToScene, radiusKmToScene, moonRadiusToScene, SUN_RADIUS } from "../astronomy/scale";
+import { heliocentricScenePosition, moonSceneOffsetFromEarth } from "../astronomy/ephemeris";
 import { planetFacts, SUN_FACTS, MOON_FACTS } from "../data/facts";
 import { useTimeStore } from "../state/timeStore";
 import type { Selection } from "./selection";
@@ -60,22 +60,32 @@ export function SolarSystem({
   const isScrubbing = useTimeStore((s) => s.isScrubbing);
 
   // Closing the tooltip shouldn't drop the camera focus, so its visibility
-  // is tracked separately from the selection itself — dismissed here,
-  // brought back whenever a (possibly new) body is selected.
+  // is tracked separately from the selection itself — dismissed on close,
+  // brought back whenever a body is (re-)selected, including re-clicking
+  // the already-selected body, which is how the tooltip toggles back on.
   const [tooltipDismissed, setTooltipDismissed] = useState(false);
-  useEffect(() => {
-    setTooltipDismissed(false);
-  }, [selection?.key]);
 
   const showTooltip = selection !== null && !isPlaying && !isScrubbing && !tooltipDismissed;
 
   function selectSun() {
+    setTooltipDismissed(false);
     onSelect({ key: "sun", radius: SUN_RADIUS, name: "Sun", facts: SUN_FACTS });
   }
 
   function selectPlanet(planet: PlanetData, radius: number) {
+    setTooltipDismissed(false);
     onSelect({ key: planet.name, radius, name: planet.name, facts: planetFacts(planet) });
   }
+
+  function selectMoon(radius: number) {
+    setTooltipDismissed(false);
+    onSelect({ key: "Moon", radius, name: "Moon", facts: MOON_FACTS });
+  }
+
+  const showOrbit = orbitMode !== "hidden";
+  const isMoonSelected = selection?.key === "Moon";
+  const moonOrbitVariant: OrbitVariant =
+    orbitMode === "selected" ? (isMoonSelected ? "bright" : "regular") : (orbitMode as OrbitVariant);
 
   return (
     <>
@@ -88,7 +98,6 @@ export function SolarSystem({
 
       {PLANETS.map((planet) => {
         const isSelected = selection?.key === planet.name;
-        const showOrbit = orbitMode !== "hidden";
         const variant: OrbitVariant =
           orbitMode === "selected" ? (isSelected ? "bright" : "regular") : (orbitMode as OrbitVariant);
 
@@ -96,7 +105,7 @@ export function SolarSystem({
           <group key={planet.name}>
             {showOrbit && (
               <OrbitPath
-                planetName={planet.name}
+                getPosition={(date) => heliocentricScenePosition(planet.name, date)}
                 orbitalPeriodDays={planet.orbitalPeriodDays}
                 referenceDate={orbitShapeReferenceDate}
                 color={planet.color}
@@ -114,6 +123,34 @@ export function SolarSystem({
           </group>
         );
       })}
+
+      <group>
+        {showOrbit && (
+          <OrbitPath
+            getPosition={moonSceneOffsetFromEarth}
+            followCenter={(date) => heliocentricScenePosition("Earth", date)}
+            orbitalPeriodDays={MOON.orbitalPeriodDays}
+            referenceDate={orbitShapeReferenceDate}
+            color={MOON.color}
+            variant={moonOrbitVariant}
+            // The Moon's orbit (~1.7 scene units) is over an order of
+            // magnitude smaller than any planet's — the default dash/arrow
+            // sizes (tuned for orbits 16-70 units across) would read as
+            // oversized chunks here, so it gets its own, much smaller scale
+            // plus more segments/arrows so the tiny loop still reads smoothly.
+            segments={240}
+            arrowCount={12}
+            dashSize={0.05}
+            gapSize={0.02}
+            arrowRadius={0.02}
+            arrowLength={0.05}
+          />
+        )}
+        <Moon onFocus={selectMoon} showAxisLine={showAxisLine} />
+        {showPlanetLabels && (
+          <PlanetNameLabel planetName="Moon" radius={moonRadiusToScene(MOON.radiusKm)} />
+        )}
+      </group>
 
       <CameraRig
         focusKey={selection?.key ?? "overview"}

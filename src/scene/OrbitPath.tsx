@@ -5,10 +5,19 @@ import { Quaternion, Vector3, type Group } from "three";
 import { useTimeStore } from "../state/timeStore";
 import type { OrbitVariant } from "./orbitDisplay";
 
-const SEGMENTS = 180;
 const DAY_MS = 24 * 60 * 60 * 1000;
-const ARROW_COUNT = 8;
 const UP = new Vector3(0, 1, 0);
+
+// Tuned for planet-scale orbits (radius ~16-70 scene units). The Moon's orbit
+// around Earth is smaller by more than an order of magnitude (~1.7 units),
+// so it passes its own, much smaller values for these — otherwise the same
+// absolute dash/gap/arrow sizes read as oversized chunks on its tiny loop.
+const DEFAULT_SEGMENTS = 180;
+const DEFAULT_ARROW_COUNT = 8;
+const DEFAULT_DASH_SIZE = 0.6;
+const DEFAULT_GAP_SIZE = 0.2;
+const DEFAULT_ARROW_RADIUS = 0.08;
+const DEFAULT_ARROW_LENGTH = 0.22;
 
 // "regular" and "bright" match what used to be the only two looks (formerly
 // labeled "Dim" and "Regular" respectively); "dim" is new, at half of
@@ -35,6 +44,12 @@ interface OrbitPathProps {
    * be wasted work.
    */
   followCenter?: (date: Date) => [number, number, number];
+  segments?: number;
+  arrowCount?: number;
+  dashSize?: number;
+  gapSize?: number;
+  arrowRadius?: number;
+  arrowLength?: number;
 }
 
 // Sampled from real positions across one full orbital period (rather than a
@@ -50,21 +65,27 @@ export function OrbitPath({
   color,
   variant,
   followCenter,
+  segments = DEFAULT_SEGMENTS,
+  arrowCount = DEFAULT_ARROW_COUNT,
+  dashSize = DEFAULT_DASH_SIZE,
+  gapSize = DEFAULT_GAP_SIZE,
+  arrowRadius = DEFAULT_ARROW_RADIUS,
+  arrowLength = DEFAULT_ARROW_LENGTH,
 }: OrbitPathProps) {
   const groupRef = useRef<Group>(null);
 
   const points = useMemo(() => {
     const startMs = referenceDate.getTime();
     const periodMs = orbitalPeriodDays * DAY_MS;
-    return Array.from({ length: SEGMENTS + 1 }, (_, i) => {
-      const date = new Date(startMs + (i / SEGMENTS) * periodMs);
+    return Array.from({ length: segments + 1 }, (_, i) => {
+      const date = new Date(startMs + (i / segments) * periodMs);
       return new Vector3(...getPosition(date));
     });
-  }, [getPosition, orbitalPeriodDays, referenceDate]);
+  }, [getPosition, orbitalPeriodDays, referenceDate, segments]);
 
   const arrows = useMemo(() => {
-    return Array.from({ length: ARROW_COUNT }, (_, i) => {
-      const index = Math.floor((i / ARROW_COUNT) * SEGMENTS);
+    return Array.from({ length: arrowCount }, (_, i) => {
+      const index = Math.floor((i / arrowCount) * segments);
       const current = points[index];
       const next = points[(index + 1) % points.length];
       const tangent = next.clone().sub(current).normalize();
@@ -73,7 +94,21 @@ export function OrbitPath({
         quaternion: new Quaternion().setFromUnitVectors(UP, tangent),
       };
     });
-  }, [points]);
+  }, [points, arrowCount, segments]);
+
+  // A chevron ("^") drawn as two thin line segments rather than a filled
+  // shape — the tip points along +Y to match the old cone's orientation
+  // convention, so the tangent-alignment quaternion above still applies
+  // unchanged.
+  const chevronPoints = useMemo(() => {
+    const halfWidth = arrowRadius;
+    const halfLength = arrowLength / 2;
+    return [
+      new Vector3(-halfWidth, -halfLength, 0),
+      new Vector3(0, halfLength, 0),
+      new Vector3(halfWidth, -halfLength, 0),
+    ];
+  }, [arrowRadius, arrowLength]);
 
   useFrame(() => {
     if (!followCenter || !groupRef.current) return;
@@ -92,14 +127,20 @@ export function OrbitPath({
         transparent
         opacity={opacity}
         dashed
-        dashSize={0.6}
-        gapSize={0.2}
+        dashSize={dashSize}
+        gapSize={gapSize}
       />
       {arrows.map((arrow, i) => (
-        <mesh key={i} position={arrow.position} quaternion={arrow.quaternion}>
-          <coneGeometry args={[0.08, 0.22, 3]} />
-          <meshBasicMaterial color={color} transparent opacity={opacity} />
-        </mesh>
+        <Line
+          key={i}
+          points={chevronPoints}
+          position={arrow.position}
+          quaternion={arrow.quaternion}
+          color={color}
+          lineWidth={lineWidth}
+          transparent
+          opacity={opacity}
+        />
       ))}
     </group>
   );

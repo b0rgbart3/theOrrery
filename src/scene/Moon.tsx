@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { Line, useTexture } from "@react-three/drei";
 import type { Group } from "three";
-import { radiusKmToScene } from "../astronomy/scale";
+import { moonRadiusToScene } from "../astronomy/scale";
 import { moonScenePosition, moonOrientationQuaternion } from "../astronomy/ephemeris";
 import { useTimeStore } from "../state/timeStore";
 import { MOON } from "../data/moon";
@@ -16,7 +16,7 @@ export function Moon({ onFocus, showAxisLine }: MoonProps) {
   const groupRef = useRef<Group>(null);
   const orientationRef = useRef<Group>(null);
   const texture = useTexture(MOON.texture);
-  const radius = radiusKmToScene(MOON.radiusKm);
+  const radius = moonRadiusToScene(MOON.radiusKm);
 
   useFrame(() => {
     const simDate = useTimeStore.getState().simDate;

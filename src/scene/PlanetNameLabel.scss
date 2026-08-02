@@ -1,3 +1,5 @@
+@use "../styles/tokens" as *;
+
 .planet-name-label {
   position: relative;
   pointer-events: none;
@@ -9,8 +11,8 @@
     width: 3px;
     height: 3px;
     border-radius: 50%;
-    background: #e9d9b6;
-    box-shadow: 0 0 4px rgba(233, 217, 182, 0.8);
+    background: $color-text-primary;
+    box-shadow: 0 0 4px $color-glow-dot;
   }
 
   &__line {
@@ -19,7 +21,7 @@
     left: 0;
     width: 58px;
     height: 1px;
-    background: linear-gradient(to right, rgba(233, 217, 182, 0.05), rgba(233, 217, 182, 0.55));
+    background: linear-gradient(to right, $color-glow-soft, $color-glow-strong);
     transform-origin: 0 0;
     transform: rotate(-38deg);
   }
@@ -31,14 +33,14 @@
     white-space: nowrap;
     transform: translateY(-100%);
 
-    font-family: "Cinzel", "Times New Roman", serif;
+    font-family: $font-display;
     font-weight: 600;
     font-size: 0.7rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #e9d9b6;
+    color: $color-text-primary;
     text-shadow:
       0 0 10px #000000,
-      0 0 6px rgba(233, 217, 182, 0.35);
+      0 0 6px $color-glow;
   }
 }

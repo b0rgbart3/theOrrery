@@ -1,3 +1,5 @@
+@use "../styles/tokens" as *;
+
 .timeline {
   position: fixed;
   left: 50%;
@@ -8,18 +10,18 @@
   gap: 0.6rem;
   padding: 0.5rem 0.9rem;
   border-radius: 10px;
-  background: #5f533e;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #000;
-  font-family: system-ui, sans-serif;
+  background: $color-bg-timeline;
+  border: 1px solid $color-border-control;
+  color: $color-text-on-timeline;
+  font-family: $font-body;
   font-size: 0.8rem;
   backdrop-filter: blur(4px);
   z-index: 10;
 
   button,
   select {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: $color-control-bg;
+    border: 1px solid $color-border-control;
     color: inherit;
     border-radius: 6px;
     cursor: pointer;
@@ -31,7 +33,7 @@
   }
 
   button:hover {
-    background: rgba(255, 255, 255, 0.16);
+    background: $color-control-bg-hover;
   }
 
   select {
@@ -45,12 +47,12 @@
 
   &__scrub {
     width: 220px;
-    accent-color: #d1a446;
+    accent-color: $color-accent;
 
     &::-webkit-slider-runnable-track {
       background: linear-gradient(
         to right,
-        #483d27 var(--scrub-progress, 0%),
+        $color-timeline-track var(--scrub-progress, 0%),
         #000 var(--scrub-progress, 0%)
       );
     }
@@ -60,7 +62,7 @@
     }
 
     &::-moz-range-progress {
-      background: #483d27;
+      background: $color-timeline-track;
     }
   }
 

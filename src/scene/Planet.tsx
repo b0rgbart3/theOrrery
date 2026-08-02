@@ -17,7 +17,9 @@ interface PlanetProps {
 export function Planet({ data, onFocus, showAxisLine }: PlanetProps) {
   const groupRef = useRef<Group>(null);
   const meshRef = useRef<Mesh>(null);
+  const atmosphereRef = useRef<Mesh>(null);
   const texture = useTexture(data.texture);
+  const atmosphereTexture = useTexture(data.atmosphere?.texture ?? data.texture);
   const radius = radiusKmToScene(data.radiusKm);
   const tiltRad = (data.axialTiltDeg * Math.PI) / 180;
 
@@ -29,13 +31,22 @@ export function Planet({ data, onFocus, showAxisLine }: PlanetProps) {
       groupRef.current.position.set(x, y, z);
     }
 
+    // Driven by the same simulation clock as orbital position (not real
+    // wall-clock time), so speeding up/scrubbing the timeline speeds up or
+    // reverses self-rotation right along with orbital motion.
+    const simHours = simDate.getTime() / 3_600_000;
+    const phase = (simHours / data.rotationPeriodHours) % 1;
+    const rotationY = phase * Math.PI * 2;
+
     if (meshRef.current) {
-      // Driven by the same simulation clock as orbital position (not real
-      // wall-clock time), so speeding up/scrubbing the timeline speeds up or
-      // reverses self-rotation right along with orbital motion.
-      const simHours = simDate.getTime() / 3_600_000;
-      const phase = (simHours / data.rotationPeriodHours) % 1;
-      meshRef.current.rotation.y = phase * Math.PI * 2;
+      meshRef.current.rotation.y = rotationY;
+    }
+
+    // The atmosphere shares the surface mesh's rotation so its weather
+    // pattern stays locked to the same rotation phase (and, via the shared
+    // parent group, the same orbital position) as the planet underneath.
+    if (atmosphereRef.current) {
+      atmosphereRef.current.rotation.y = rotationY;
     }
   });
 
@@ -51,6 +62,18 @@ export function Planet({ data, onFocus, showAxisLine }: PlanetProps) {
           <sphereGeometry args={[radius, 48, 48]} />
           <meshStandardMaterial map={texture} roughness={1} />
         </mesh>
+        {data.atmosphere && (
+          <mesh ref={atmosphereRef}>
+            <sphereGeometry args={[radius * data.atmosphere.scaleFactor, 48, 48]} />
+            <meshStandardMaterial
+              map={atmosphereTexture}
+              transparent
+              opacity={data.atmosphere.opacity}
+              depthWrite={false}
+              roughness={1}
+            />
+          </mesh>
+        )}
         {showAxisLine && (
           <Line
             points={[
