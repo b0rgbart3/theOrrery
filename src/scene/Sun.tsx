@@ -1,13 +1,41 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
-import type { Mesh } from "three";
+import { AdditiveBlending, BackSide, Color, type Mesh } from "three";
 import { SUN_RADIUS } from "../astronomy/scale";
 import { useTimeStore } from "../state/timeStore";
 
 // Sidereal rotation period at the Sun's equator (it rotates faster at the
 // equator than near the poles, but a single rate is enough for this model).
 const SUN_ROTATION_PERIOD_HOURS = 609.12;
+
+// A fixed fraction of the Sun's own radius (a scene-space size, not screen
+// pixels), so the glow scales down with the Sun when you zoom out and stays
+// a thin rim rather than reading as a fat halo relative to the disk.
+const GLOW_THICKNESS_RATIO = 0.12;
+const GLOW_SCALE = (SUN_RADIUS + SUN_RADIUS * GLOW_THICKNESS_RATIO) / SUN_RADIUS;
+const GLOW_COLOR = new Color("#ffcc77");
+
+const glowVertexShader = `
+  varying vec3 vNormal;
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const glowFragmentShader = `
+  uniform vec3 glowColor;
+  varying vec3 vNormal;
+  void main() {
+    float facing = 0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0));
+    // smoothstep (rather than a steep power curve) fades all the way to 0 at
+    // the outer edge and eases in gradually, instead of jumping straight to
+    // a hard, mostly-opaque ring.
+    float rim = smoothstep(0.65, 1.3, facing);
+    gl_FragColor = vec4(glowColor, rim * 0.6);
+  }
+`;
 
 interface SunProps {
   onFocus: () => void;
@@ -16,6 +44,8 @@ interface SunProps {
 export function Sun({ onFocus }: SunProps) {
   const meshRef = useRef<Mesh>(null);
   const texture = useTexture("/textures/sun.jpg");
+
+  const glowUniforms = useMemo(() => ({ glowColor: { value: GLOW_COLOR } }), []);
 
   useFrame(() => {
     if (meshRef.current) {
@@ -31,9 +61,23 @@ export function Sun({ onFocus }: SunProps) {
   }
 
   return (
-    <mesh ref={meshRef} onClick={handleClick}>
-      <sphereGeometry args={[SUN_RADIUS, 64, 64]} />
-      <meshBasicMaterial map={texture} />
-    </mesh>
+    <group>
+      <mesh ref={meshRef} onClick={handleClick}>
+        <sphereGeometry args={[SUN_RADIUS, 64, 64]} />
+        <meshBasicMaterial map={texture} />
+      </mesh>
+      <mesh scale={GLOW_SCALE} raycast={() => null}>
+        <sphereGeometry args={[SUN_RADIUS, 64, 64]} />
+        <shaderMaterial
+          vertexShader={glowVertexShader}
+          fragmentShader={glowFragmentShader}
+          uniforms={glowUniforms}
+          transparent
+          blending={AdditiveBlending}
+          depthWrite={false}
+          side={BackSide}
+        />
+      </mesh>
+    </group>
   );
 }

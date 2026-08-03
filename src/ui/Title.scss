@@ -7,6 +7,7 @@
   transform: translateX(-50%);
   z-index: 10;
   cursor: pointer;
+  white-space: nowrap;
 
   font-family: $font-display;
   font-weight: 600;
@@ -31,5 +32,9 @@
 
   &__initial {
     font-size: 1.25em;
+  }
+
+  @media (max-width: 600px) {
+    font-size: 1.25rem;
   }
 }

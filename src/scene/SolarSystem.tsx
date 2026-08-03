@@ -67,17 +67,33 @@ export function SolarSystem({
 
   const showTooltip = selection !== null && !isPlaying && !isScrubbing && !tooltipDismissed;
 
+  // Clicking the already-selected body toggles its tooltip off (and a
+  // repeat click brings it back) instead of just re-showing it — this is
+  // the "click a planet to open/close its tooltip" behavior, distinct from
+  // the tooltip's own close button which always dismisses.
   function selectSun() {
+    if (selection?.key === "sun") {
+      setTooltipDismissed((dismissed) => !dismissed);
+      return;
+    }
     setTooltipDismissed(false);
     onSelect({ key: "sun", radius: SUN_RADIUS, name: "Sun", facts: SUN_FACTS });
   }
 
   function selectPlanet(planet: PlanetData, radius: number) {
+    if (selection?.key === planet.name) {
+      setTooltipDismissed((dismissed) => !dismissed);
+      return;
+    }
     setTooltipDismissed(false);
     onSelect({ key: planet.name, radius, name: planet.name, facts: planetFacts(planet) });
   }
 
   function selectMoon(radius: number) {
+    if (selection?.key === "Moon") {
+      setTooltipDismissed((dismissed) => !dismissed);
+      return;
+    }
     setTooltipDismissed(false);
     onSelect({ key: "Moon", radius, name: "Moon", facts: MOON_FACTS });
   }

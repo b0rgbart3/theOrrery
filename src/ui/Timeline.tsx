@@ -1,17 +1,15 @@
 import { useState, type ChangeEvent, type CSSProperties } from "react";
 import { useTimeStore, SPEED_PRESETS } from "../state/timeStore";
-import { ORBIT_DISPLAY_OPTIONS, type OrbitDisplayMode } from "../scene/orbitDisplay";
 import "./Timeline.scss";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SCRUB_RANGE_DAYS = 365 * 5; // +/- 5 years around the page's load time
 
 interface TimelineProps {
-  orbitMode: OrbitDisplayMode;
-  onOrbitModeChange: (mode: OrbitDisplayMode) => void;
+  onOpenSettings: () => void;
 }
 
-export function Timeline({ orbitMode, onOrbitModeChange }: TimelineProps) {
+export function Timeline({ onOpenSettings }: TimelineProps) {
   const simDate = useTimeStore((s) => s.simDate);
   const isPlaying = useTimeStore((s) => s.isPlaying);
   const daysPerSecond = useTimeStore((s) => s.daysPerSecond);
@@ -76,17 +74,14 @@ export function Timeline({ orbitMode, onOrbitModeChange }: TimelineProps) {
         {simDate.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
       </span>
 
-      <select
-        value={orbitMode}
-        onChange={(e) => onOrbitModeChange(e.target.value as OrbitDisplayMode)}
-        aria-label="Orbit path display"
+      <button
+        className="timeline__settings"
+        onClick={onOpenSettings}
+        aria-label="Settings"
+        title="Settings"
       >
-        {ORBIT_DISPLAY_OPTIONS.map((option) => (
-          <option key={option.mode} value={option.mode}>
-            Orbits: {option.label}
-          </option>
-        ))}
-      </select>
+        ⚙
+      </button>
     </div>
   );
 }

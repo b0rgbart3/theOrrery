@@ -40,10 +40,12 @@ export default function App() {
         onShowAxisLineChange={setShowAxisLine}
         showPlanetLabels={showPlanetLabels}
         onShowPlanetLabelsChange={setShowPlanetLabels}
+        orbitMode={orbitMode}
+        onOrbitModeChange={setOrbitMode}
         aboutOpen={aboutOpen}
         onAboutOpenChange={setAboutOpen}
       />
-      <Timeline orbitMode={orbitMode} onOrbitModeChange={setOrbitMode} />
+      <Timeline onOpenSettings={() => setAboutOpen(true)} />
     </>
   );
 }

@@ -26,6 +26,7 @@
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.8rem;
+    font-weight: 700;
   }
 
   button {
@@ -70,5 +71,49 @@
     min-width: 100px;
     text-align: right;
     opacity: 0.85;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+
+  &__settings {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  @media (max-width: 600px) {
+    bottom: 0;
+    border-radius: 0;
+    padding-bottom: calc(0.5rem + 40px + env(safe-area-inset-bottom, 0px));
+    flex-wrap: wrap;
+    justify-content: center;
+    width: min(92vw, 360px);
+    row-gap: 0.5rem;
+
+    button {
+      order: 2;
+    }
+
+    &__scrub {
+      order: 1;
+      flex: 1 1 100%;
+      width: auto;
+    }
+
+    select {
+      order: 2;
+    }
+
+    &__date {
+      order: 2;
+      width: 100px;
+      min-width: 0;
+      text-align: center;
+    }
+
+    &__settings {
+      order: 3;
+      flex: 1 1 100%;
+      width: auto;
+    }
   }
 }
