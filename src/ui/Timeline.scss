@@ -105,6 +105,26 @@
       border-radius: 3px;
       background: $color-timeline-track;
     }
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      margin-top: -6px;
+      border-radius: 50%;
+      background: $color-accent;
+      cursor: pointer;
+    }
+
+    &::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border: none;
+      border-radius: 50%;
+      background: $color-accent;
+      cursor: pointer;
+    }
   }
 
   &__date {
