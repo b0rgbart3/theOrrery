@@ -18,17 +18,25 @@ const GLOW_COLOR = new Color("#ffcc77");
 
 const glowVertexShader = `
   varying vec3 vNormal;
+  varying vec3 vViewPosition;
   void main() {
     vNormal = normalize(normalMatrix * normal);
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    vViewPosition = -mvPosition.xyz;
+    gl_Position = projectionMatrix * mvPosition;
   }
 `;
 
 const glowFragmentShader = `
   uniform vec3 glowColor;
   varying vec3 vNormal;
+  varying vec3 vViewPosition;
   void main() {
-    float facing = 0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0));
+    // Per-fragment view direction (not a fixed camera-forward axis), so the
+    // rim stays spherically symmetric even when the Sun is off-center /
+    // viewed at an angle, e.g. while the camera is focused on a planet.
+    vec3 viewDir = normalize(vViewPosition);
+    float facing = 0.65 - dot(vNormal, viewDir);
     // smoothstep (rather than a steep power curve) fades all the way to 0 at
     // the outer edge and eases in gradually, instead of jumping straight to
     // a hard, mostly-opaque ring.
