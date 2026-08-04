@@ -21,6 +21,13 @@ $color-timeline-track: #483d27;
 $color-control-bg: rgba(255, 255, 255, 0.08);
 $color-control-bg-hover: rgba(255, 255, 255, 0.16);
 
+// Timeline-only controls — same brown/gold family as the Modal panel, but
+// more saturated: at button size the Modal's near-desaturated $color-bg-panel
+// reads as flat/washed-out rather than "brown", so these get their own richer tone.
+$color-timeline-control-bg: hsl(30, 39%, 14%);
+$color-timeline-control-bg-hover: hsl(30, 43%, 18%);
+$color-timeline-control-border: $color-border;
+
 // Glows / shadows
 $color-glow: rgba(233, 217, 182, 0.35);
 $color-glow-strong: rgba(233, 217, 182, 0.55);

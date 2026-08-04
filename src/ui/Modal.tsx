@@ -5,12 +5,16 @@ interface ModalProps {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  className?: string;
 }
 
-export function Modal({ title, onClose, children }: ModalProps) {
+export function Modal({ title, onClose, children, className }: ModalProps) {
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(event) => event.stopPropagation()}>
+      <div
+        className={className ? `modal ${className}` : "modal"}
+        onClick={(event) => event.stopPropagation()}
+      >
         <button className="modal__close" onClick={onClose} aria-label="Close">
           ×
         </button>

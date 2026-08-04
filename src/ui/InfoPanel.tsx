@@ -1,27 +1,11 @@
 import { Modal } from "./Modal";
-import { ORBIT_DISPLAY_OPTIONS, type OrbitDisplayMode } from "../scene/orbitDisplay";
 
 interface InfoPanelProps {
-  showAxisLine: boolean;
-  onShowAxisLineChange: (show: boolean) => void;
-  showPlanetLabels: boolean;
-  onShowPlanetLabelsChange: (show: boolean) => void;
-  orbitMode: OrbitDisplayMode;
-  onOrbitModeChange: (mode: OrbitDisplayMode) => void;
   aboutOpen: boolean;
   onAboutOpenChange: (open: boolean) => void;
 }
 
-export function InfoPanel({
-  showAxisLine,
-  onShowAxisLineChange,
-  showPlanetLabels,
-  onShowPlanetLabelsChange,
-  orbitMode,
-  onOrbitModeChange,
-  aboutOpen,
-  onAboutOpenChange,
-}: InfoPanelProps) {
+export function InfoPanel({ aboutOpen, onAboutOpenChange }: InfoPanelProps) {
   return (
     <>
       {aboutOpen && (
@@ -64,41 +48,6 @@ export function InfoPanel({
                 to the normal starting orientation, just click on the background (stars).
               </p>
             </div>
-          </div>
-
-          <div className="modal__controls">
-            <label className="modal__toggle">
-              <input
-                type="checkbox"
-                checked={showAxisLine}
-                onChange={(event) => onShowAxisLineChange(event.target.checked)}
-              />
-              Show planet axis line
-            </label>
-
-            <label className="modal__toggle">
-              <input
-                type="checkbox"
-                checked={showPlanetLabels}
-                onChange={(event) => onShowPlanetLabelsChange(event.target.checked)}
-              />
-              Show planet labels
-            </label>
-
-            <label className="modal__toggle">
-              Orbits:
-              <select
-                value={orbitMode}
-                onChange={(event) => onOrbitModeChange(event.target.value as OrbitDisplayMode)}
-                aria-label="Orbit path display"
-              >
-                {ORBIT_DISPLAY_OPTIONS.map((option) => (
-                  <option key={option.mode} value={option.mode}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
           </div>
 
           <p className="modal__credit">

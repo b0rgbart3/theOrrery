@@ -24,6 +24,15 @@
   color: $color-text-primary;
   font-family: $font-body;
 
+  &--compact {
+    width: min(90vw, 420px);
+    height: auto;
+
+    .modal__controls {
+      margin-top: 0.5rem;
+    }
+  }
+
   &__close {
     position: absolute;
     top: 1rem;

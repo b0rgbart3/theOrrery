@@ -15,7 +15,8 @@ export function Timeline({ onOpenSettings }: TimelineProps) {
   const daysPerSecond = useTimeStore((s) => s.daysPerSecond);
   const setDaysPerSecond = useTimeStore((s) => s.setDaysPerSecond);
   const togglePlaying = useTimeStore((s) => s.togglePlaying);
-  const resetToNow = useTimeStore((s) => s.resetToNow);
+  const isLive = useTimeStore((s) => s.isLive);
+  const toggleLive = useTimeStore((s) => s.toggleLive);
   const scrubTo = useTimeStore((s) => s.scrubTo);
   const setScrubbing = useTimeStore((s) => s.setScrubbing);
 
@@ -40,11 +41,14 @@ export function Timeline({ onOpenSettings }: TimelineProps) {
 
   const currentPreset = SPEED_PRESETS.find((p) => p.daysPerSecond === daysPerSecond) ?? SPEED_PRESETS[0];
 
+  const monthDay = simDate.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const year = simDate.getFullYear();
+
   return (
     <div className="timeline">
-      <button onClick={togglePlaying} aria-label={isPlaying ? "Pause" : "Play"}>
-        {isPlaying ? "⏸" : "▶"}
-      </button>
+      <span className="timeline__date">
+        <span className="timeline__date-day">{monthDay}</span> {year}
+      </span>
 
       <input
         className="timeline__scrub"
@@ -60,28 +64,27 @@ export function Timeline({ onOpenSettings }: TimelineProps) {
         aria-label="Scrub timeline"
       />
 
-      <select value={currentPreset.label} onChange={handleSpeedChange} aria-label="Playback speed">
-        {SPEED_PRESETS.map((preset) => (
-          <option key={preset.label} value={preset.label}>
-            {preset.label}
-          </option>
-        ))}
-      </select>
+      <div className="timeline__row">
+        <button className="timeline__play" onClick={togglePlaying} aria-label={isPlaying ? "Pause" : "Play"}>
+          {isPlaying ? "⏸" : "▶"}
+        </button>
 
-      <button onClick={resetToNow}>Now</button>
+        <select value={currentPreset.label} onChange={handleSpeedChange} aria-label="Playback speed">
+          {SPEED_PRESETS.map((preset) => (
+            <option key={preset.label} value={preset.label}>
+              {preset.label}
+            </option>
+          ))}
+        </select>
 
-      <span className="timeline__date">
-        {simDate.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
-      </span>
+        <button className="timeline__now" onClick={toggleLive} aria-pressed={isLive}>
+          Now
+        </button>
 
-      <button
-        className="timeline__settings"
-        onClick={onOpenSettings}
-        aria-label="Settings"
-        title="Settings"
-      >
-        ⚙
-      </button>
+        <button onClick={onOpenSettings} aria-label="Settings" title="Settings">
+          Settings
+        </button>
+      </div>
     </div>
   );
 }

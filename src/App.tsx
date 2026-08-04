@@ -9,6 +9,8 @@ import type { OrbitDisplayMode } from "./scene/orbitDisplay";
 import { Timeline } from "./ui/Timeline";
 import { Title } from "./ui/Title";
 import { InfoPanel } from "./ui/InfoPanel";
+import { SettingsModal } from "./ui/SettingsModal";
+import { Loader } from "./ui/Loader";
 
 export default function App() {
   const [selection, setSelection] = useState<Selection | null>(null);
@@ -16,6 +18,7 @@ export default function App() {
   const [showAxisLine, setShowAxisLine] = useState(true);
   const [showPlanetLabels, setShowPlanetLabels] = useState(true);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <>
@@ -34,18 +37,21 @@ export default function App() {
           <Bloom intensity={0.5} luminanceThreshold={0.4} luminanceSmoothing={0.2} mipmapBlur />
         </EffectComposer>
       </Canvas>
+      <Loader />
       <Title onClick={() => setAboutOpen(true)} />
-      <InfoPanel
-        showAxisLine={showAxisLine}
-        onShowAxisLineChange={setShowAxisLine}
-        showPlanetLabels={showPlanetLabels}
-        onShowPlanetLabelsChange={setShowPlanetLabels}
-        orbitMode={orbitMode}
-        onOrbitModeChange={setOrbitMode}
-        aboutOpen={aboutOpen}
-        onAboutOpenChange={setAboutOpen}
-      />
-      <Timeline onOpenSettings={() => setAboutOpen(true)} />
+      <InfoPanel aboutOpen={aboutOpen} onAboutOpenChange={setAboutOpen} />
+      {settingsOpen && (
+        <SettingsModal
+          showAxisLine={showAxisLine}
+          onShowAxisLineChange={setShowAxisLine}
+          showPlanetLabels={showPlanetLabels}
+          onShowPlanetLabelsChange={setShowPlanetLabels}
+          orbitMode={orbitMode}
+          onOrbitModeChange={setOrbitMode}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
+      <Timeline onOpenSettings={() => setSettingsOpen(true)} />
     </>
   );
 }

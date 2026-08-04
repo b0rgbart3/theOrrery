@@ -21,9 +21,14 @@ interface TimeState {
   daysPerSecond: number;
   isPlaying: boolean;
   isScrubbing: boolean;
+  // When true, simDate continuously tracks the actual current time each
+  // frame (a live clock) instead of the manual daysPerSecond playback below.
+  // Any manual interaction (play, speed change, scrub) disengages it; the
+  // "Now" button re-engages it and snaps back to the real date.
+  isLive: boolean;
   setDaysPerSecond: (value: number) => void;
   togglePlaying: () => void;
-  resetToNow: () => void;
+  toggleLive: () => void;
   scrubTo: (date: Date) => void;
   setScrubbing: (active: boolean) => void;
   advance: (deltaSeconds: number) => void;
@@ -38,13 +43,21 @@ export const useTimeStore = create<TimeState>((set, get) => ({
   daysPerSecond: 1,
   isPlaying: false,
   isScrubbing: false,
-  setDaysPerSecond: (value) => set({ daysPerSecond: value }),
-  togglePlaying: () => set((s) => ({ isPlaying: !s.isPlaying })),
-  resetToNow: () => set({ simDate: new Date(), isPlaying: false }),
-  scrubTo: (date) => set({ simDate: date, isPlaying: false }),
+  isLive: true,
+  setDaysPerSecond: (value) => set({ daysPerSecond: value, isLive: false }),
+  togglePlaying: () => set((s) => ({ isPlaying: !s.isPlaying, isLive: false })),
+  toggleLive: () =>
+    set((s) =>
+      s.isLive ? { isLive: false } : { isLive: true, isPlaying: false, simDate: new Date() }
+    ),
+  scrubTo: (date) => set({ simDate: date, isPlaying: false, isLive: false }),
   setScrubbing: (active) => set({ isScrubbing: active }),
   advance: (deltaSeconds) => {
-    const { isPlaying, daysPerSecond, simDate } = get();
+    const { isLive, isPlaying, daysPerSecond, simDate } = get();
+    if (isLive) {
+      set({ simDate: new Date() });
+      return;
+    }
     if (!isPlaying) return;
     set({ simDate: new Date(simDate.getTime() + daysPerSecond * DAY_MS * deltaSeconds) });
   },

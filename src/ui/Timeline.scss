@@ -6,39 +6,60 @@
   bottom: 1.25rem;
   transform: translateX(-50%);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 0.6rem;
   padding: 0.5rem 0.9rem;
   border-radius: 10px;
-  background: $color-bg-timeline;
-  border: 1px solid $color-border-control;
+  background: transparent;
+  border: none;
   color: $color-text-on-timeline;
   font-family: $font-body;
   font-size: 0.8rem;
-  backdrop-filter: blur(4px);
   z-index: 10;
 
   button,
   select {
-    background: $color-control-bg;
-    border: 1px solid $color-border-control;
-    color: inherit;
-    border-radius: 6px;
+    background: $color-timeline-control-bg;
+    border: 1px solid $color-timeline-control-border;
+    color: $color-text-primary;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: 1rem;
     font-weight: 700;
   }
 
   button {
-    padding: 0.3rem 0.6rem;
+    height: 2.25rem;
+    padding: 0 0.9rem;
+    line-height: 1;
+  }
+
+  &__play {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    padding: 0;
   }
 
   button:hover {
-    background: $color-control-bg-hover;
+    background: $color-timeline-control-bg-hover;
+  }
+
+  &__now[aria-pressed="true"] {
+    background: $color-accent;
+    border-color: $color-accent;
+    color: $color-bg-panel;
+  }
+
+  &__now[aria-pressed="true"]:hover {
+    background: lighten($color-accent, 8%);
   }
 
   select {
-    padding: 0.25rem 0.4rem;
+    padding: 0.45rem 0.6rem;
   }
 
   select:focus,
@@ -46,11 +67,27 @@
     outline: none;
   }
 
+  &__row {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    gap: 0.6rem;
+  }
+
   &__scrub {
-    width: 220px;
+    order: -1;
+    flex: 1 1 100%;
+    width: auto;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: 1px solid $color-underline;
+    border-radius: 4px;
     accent-color: $color-accent;
 
     &::-webkit-slider-runnable-track {
+      border-radius: 3px;
       background: linear-gradient(
         to right,
         $color-timeline-track var(--scrub-progress, 0%),
@@ -59,61 +96,36 @@
     }
 
     &::-moz-range-track {
+      border-radius: 3px;
       background: #000;
     }
 
     &::-moz-range-progress {
+      border-radius: 3px;
       background: $color-timeline-track;
     }
   }
 
   &__date {
-    min-width: 100px;
-    text-align: right;
-    opacity: 0.85;
+    order: -2;
+    flex: 1 1 100%;
+    text-align: center;
+    font-family: $font-display;
     font-variant-numeric: tabular-nums;
+    font-size: 1.4rem;
     font-weight: 700;
+    color: $color-text-primary;
   }
 
-  &__settings {
-    font-size: 1rem;
-    line-height: 1;
+  &__date-day {
+    margin-right: 0.3em;
+    font-size: 1.25em;
   }
 
   @media (max-width: 600px) {
     bottom: 0;
     border-radius: 0;
     padding-bottom: calc(0.5rem + 40px + env(safe-area-inset-bottom, 0px));
-    flex-wrap: wrap;
-    justify-content: center;
-    width: min(92vw, 360px);
     row-gap: 0.5rem;
-
-    button {
-      order: 2;
-    }
-
-    &__scrub {
-      order: 1;
-      flex: 1 1 100%;
-      width: auto;
-    }
-
-    select {
-      order: 2;
-    }
-
-    &__date {
-      order: 2;
-      width: 100px;
-      min-width: 0;
-      text-align: center;
-    }
-
-    &__settings {
-      order: 3;
-      flex: 1 1 100%;
-      width: auto;
-    }
   }
 }
