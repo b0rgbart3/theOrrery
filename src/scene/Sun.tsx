@@ -1,9 +1,10 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import { AdditiveBlending, BackSide, Color, type Mesh } from "three";
 import { SUN_RADIUS } from "../astronomy/scale";
 import { useTimeStore } from "../state/timeStore";
+import { useOcclusionStore } from "../state/occlusionStore";
 
 // Sidereal rotation period at the Sun's equator (it rotates faster at the
 // equator than near the poles, but a single rate is enough for this model).
@@ -54,6 +55,14 @@ export function Sun({ onFocus }: SunProps) {
   const texture = useTexture("/textures/sun.jpg");
 
   const glowUniforms = useMemo(() => ({ glowColor: { value: GLOW_COLOR } }), []);
+
+  // Registers the Sun's own mesh as a label occluder (see PlanetNameLabel /
+  // PlanetLabel's `occlude` prop) so a planet's label disappears while the
+  // planet itself is hidden behind the Sun's disc.
+  useEffect(() => {
+    useOcclusionStore.getState().registerOccluder("sun", meshRef);
+    return () => useOcclusionStore.getState().unregisterOccluder("sun");
+  }, []);
 
   useFrame(() => {
     if (meshRef.current) {

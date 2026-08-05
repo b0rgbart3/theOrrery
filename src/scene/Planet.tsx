@@ -1,10 +1,11 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { Line, useTexture } from "@react-three/drei";
 import type { Group, Mesh } from "three";
 import { radiusKmToScene } from "../astronomy/scale";
 import { heliocentricScenePosition } from "../astronomy/ephemeris";
 import { useTimeStore } from "../state/timeStore";
+import { useOcclusionStore } from "../state/occlusionStore";
 import type { PlanetData } from "../data/planets";
 import { PlanetRing } from "./PlanetRing";
 
@@ -22,6 +23,14 @@ export function Planet({ data, onFocus, showAxisLine }: PlanetProps) {
   const atmosphereTexture = useTexture(data.atmosphere?.texture ?? data.texture);
   const radius = radiusKmToScene(data.radiusKm);
   const tiltRad = (data.axialTiltDeg * Math.PI) / 180;
+
+  // Registers this planet's surface mesh as a label occluder (see
+  // PlanetNameLabel / PlanetLabel's `occlude` prop) so other bodies' labels
+  // hide correctly when this planet passes in front of them.
+  useEffect(() => {
+    useOcclusionStore.getState().registerOccluder(data.name, meshRef);
+    return () => useOcclusionStore.getState().unregisterOccluder(data.name);
+  }, [data.name]);
 
   useFrame(() => {
     const simDate = useTimeStore.getState().simDate;

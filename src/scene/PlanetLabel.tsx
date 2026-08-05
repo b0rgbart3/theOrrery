@@ -1,10 +1,11 @@
-import { useRef } from "react";
+import { useMemo, useRef, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import type { Group } from "three";
+import type { Group, Object3D } from "three";
 import type { Fact } from "../data/facts";
 import { scenePositionForKey } from "../astronomy/ephemeris";
 import { useTimeStore } from "../state/timeStore";
+import { useOcclusionStore } from "../state/occlusionStore";
 import "./PlanetLabel.scss";
 
 interface PlanetLabelProps {
@@ -21,6 +22,17 @@ interface PlanetLabelProps {
 // planet as it actually moves along its orbit during playback.
 export function PlanetLabel({ selectionKey, radius, name, facts, onClose }: PlanetLabelProps) {
   const groupRef = useRef<Group>(null);
+  const occludersById = useOcclusionStore((s) => s.occludersById);
+  // Exclude the selected body's own mesh so its tooltip doesn't flicker out
+  // against its own surface, same reasoning as PlanetNameLabel.
+  const occluders = useMemo(
+    () => Object.entries(occludersById)
+      .filter(([id]) => id !== selectionKey)
+      // drei's occlude prop type predates React 19's nullable RefObject --
+      // Html only ever reads `.current`, which safely tolerates null.
+      .map(([, ref]) => ref as RefObject<Object3D>),
+    [occludersById, selectionKey]
+  );
 
   useFrame(() => {
     if (!groupRef.current) return;
@@ -31,7 +43,7 @@ export function PlanetLabel({ selectionKey, radius, name, facts, onClose }: Plan
 
   return (
     <group ref={groupRef}>
-      <Html center>
+      <Html center occlude={occluders}>
         <div className="planet-label">
           <button
             className="planet-label__close"

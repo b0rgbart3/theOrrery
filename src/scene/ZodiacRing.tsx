@@ -117,7 +117,7 @@ export function ZodiacRing() {
         <meshBasicMaterial
           map={texture}
           transparent
-          opacity={0.37}
+          opacity={0.27}
           side={DoubleSide}
           depthWrite={false}
         />

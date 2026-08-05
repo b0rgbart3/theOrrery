@@ -1,10 +1,11 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { Line, useTexture } from "@react-three/drei";
-import type { Group } from "three";
+import type { Group, Mesh } from "three";
 import { moonRadiusToScene } from "../astronomy/scale";
 import { moonScenePosition, moonOrientationQuaternion } from "../astronomy/ephemeris";
 import { useTimeStore } from "../state/timeStore";
+import { useOcclusionStore } from "../state/occlusionStore";
 import { MOON } from "../data/moon";
 
 interface MoonProps {
@@ -15,8 +16,17 @@ interface MoonProps {
 export function Moon({ onFocus, showAxisLine }: MoonProps) {
   const groupRef = useRef<Group>(null);
   const orientationRef = useRef<Group>(null);
+  const meshRef = useRef<Mesh>(null);
   const texture = useTexture(MOON.texture);
   const radius = moonRadiusToScene(MOON.radiusKm);
+
+  // Registers the Moon's own mesh as a label occluder (see PlanetNameLabel /
+  // PlanetLabel's `occlude` prop) so its label hides correctly behind other
+  // bodies (and vice versa) instead of always floating on top.
+  useEffect(() => {
+    useOcclusionStore.getState().registerOccluder("Moon", meshRef);
+    return () => useOcclusionStore.getState().unregisterOccluder("Moon");
+  }, []);
 
   useFrame(() => {
     const simDate = useTimeStore.getState().simDate;
@@ -43,7 +53,7 @@ export function Moon({ onFocus, showAxisLine }: MoonProps) {
   return (
     <group ref={groupRef}>
       <group ref={orientationRef}>
-        <mesh onClick={handleClick}>
+        <mesh ref={meshRef} onClick={handleClick}>
           <sphereGeometry args={[radius, 48, 48]} />
           <meshStandardMaterial map={texture} roughness={1} />
         </mesh>
