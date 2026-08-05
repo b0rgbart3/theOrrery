@@ -23,6 +23,11 @@ export default function App() {
   const { active, progress } = useProgress();
   const isReady = !active && progress === 100;
 
+  const handleShowZodiacChange = (show: boolean) => {
+    setShowZodiac(show);
+    if (show) setOrbitMode("hidden");
+  };
+
   return (
     <>
       <Canvas camera={{ position: [0, 45, 95], fov: 50, far: 2000 }} onPointerMissed={() => setSelection(null)}>
@@ -51,7 +56,7 @@ export default function App() {
           showPlanetLabels={showPlanetLabels}
           onShowPlanetLabelsChange={setShowPlanetLabels}
           showZodiac={showZodiac}
-          onShowZodiacChange={setShowZodiac}
+          onShowZodiacChange={handleShowZodiacChange}
           orbitMode={orbitMode}
           onOrbitModeChange={setOrbitMode}
           onClose={() => setSettingsOpen(false)}
