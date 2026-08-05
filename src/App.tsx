@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Stars } from "@react-three/drei";
+import { Stars, useProgress } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import { SolarSystem } from "./scene/SolarSystem";
 import { ViewportShift } from "./scene/ViewportShift";
@@ -20,6 +20,8 @@ export default function App() {
   const [showZodiac, setShowZodiac] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { active, progress } = useProgress();
+  const isReady = !active && progress === 100;
 
   return (
     <>
@@ -55,7 +57,7 @@ export default function App() {
           onClose={() => setSettingsOpen(false)}
         />
       )}
-      <Timeline onOpenSettings={() => setSettingsOpen(true)} />
+      {isReady && <Timeline onOpenSettings={() => setSettingsOpen(true)} />}
     </>
   );
 }

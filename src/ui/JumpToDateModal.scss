@@ -1,0 +1,87 @@
+@use "sass:color";
+@use "../styles/tokens" as *;
+
+.jump-to-date {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  &__fields {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+
+    &--month {
+      flex: 1.6;
+    }
+
+    &--day {
+      flex: 0.8;
+    }
+
+    &--year {
+      flex: 1;
+    }
+
+    select,
+    input {
+      box-sizing: border-box;
+      background: $color-control-bg;
+      border: 1px solid $color-border-control;
+      border-radius: 8px;
+      color: $color-text-primary;
+      font-family: $font-body;
+      font-size: 1rem;
+      padding: 0.5rem 0.6rem;
+      width: 100%;
+
+      &:focus,
+      &:focus-visible {
+        outline: none;
+        border-color: $color-accent;
+      }
+    }
+
+    input[type="number"] {
+      appearance: textfield;
+      -moz-appearance: textfield;
+
+      &::-webkit-inner-spin-button,
+      &::-webkit-outer-spin-button {
+        appearance: none;
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+  }
+
+  &__label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $color-text-muted;
+  }
+
+  &__go {
+    background: $color-accent;
+    border: 1px solid $color-accent;
+    border-radius: 8px;
+    color: $color-bg-panel;
+    font-family: $font-display;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0.65rem 1.2rem;
+    cursor: pointer;
+
+    &:hover {
+      background: color.adjust($color-accent, $lightness: 8%);
+    }
+  }
+}

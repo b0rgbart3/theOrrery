@@ -1,5 +1,6 @@
-import { useState, type ChangeEvent, type CSSProperties } from "react";
+import { Fragment, useState, type ChangeEvent, type CSSProperties } from "react";
 import { useTimeStore, SPEED_PRESETS } from "../state/timeStore";
+import { JumpToDateModal } from "./JumpToDateModal";
 import "./Timeline.scss";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -19,6 +20,7 @@ export function Timeline({ onOpenSettings }: TimelineProps) {
   const toggleLive = useTimeStore((s) => s.toggleLive);
   const scrubTo = useTimeStore((s) => s.scrubTo);
   const setScrubbing = useTimeStore((s) => s.setScrubbing);
+  const [dateModalOpen, setDateModalOpen] = useState(false);
 
   // Fixed reference point for the scrub slider's range — doesn't drift as
   // simDate itself advances during playback.
@@ -45,46 +47,68 @@ export function Timeline({ onOpenSettings }: TimelineProps) {
   const year = simDate.getFullYear();
 
   return (
-    <div className="timeline">
-      <span className="timeline__date">
-        <span className="timeline__date-day">{monthDay}</span> {year}
-      </span>
+    <Fragment>
+      <div className="timeline">
+        <span
+          className="timeline__date"
+          role="button"
+          tabIndex={0}
+          onClick={() => setDateModalOpen(true)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              setDateModalOpen(true);
+            }
+          }}
+          aria-label="Jump to date"
+        >
+          <span className="timeline__date-day">{monthDay}</span> {year}
+        </span>
 
-      <input
-        className="timeline__scrub"
-        type="range"
-        min={-SCRUB_RANGE_DAYS}
-        max={SCRUB_RANGE_DAYS}
-        step={1}
-        value={offsetDays}
-        style={{ "--scrub-progress": `${scrubProgress}%` } as CSSProperties}
-        onChange={handleScrub}
-        onPointerDown={() => setScrubbing(true)}
-        onPointerUp={() => setScrubbing(false)}
-        aria-label="Scrub timeline"
-      />
+        <input
+          className="timeline__scrub"
+          type="range"
+          min={-SCRUB_RANGE_DAYS}
+          max={SCRUB_RANGE_DAYS}
+          step={1}
+          value={offsetDays}
+          style={{ "--scrub-progress": `${scrubProgress}%` } as CSSProperties}
+          onChange={handleScrub}
+          onPointerDown={() => setScrubbing(true)}
+          onPointerUp={() => setScrubbing(false)}
+          aria-label="Scrub timeline"
+        />
 
-      <div className="timeline__row">
-        <button className="timeline__play" onClick={togglePlaying} aria-label={isPlaying ? "Pause" : "Play"}>
-          {isPlaying ? "⏸" : "▶"}
-        </button>
+        <div className="timeline__row">
+          <button className="timeline__play" onClick={togglePlaying} aria-label={isPlaying ? "Pause" : "Play"}>
+            {isPlaying ? "⏸" : "▶"}
+          </button>
 
-        <select value={currentPreset.label} onChange={handleSpeedChange} aria-label="Playback speed">
-          {SPEED_PRESETS.map((preset) => (
-            <option key={preset.label} value={preset.label}>
-              {preset.label}
-            </option>
-          ))}
-        </select>
+          <select value={currentPreset.label} onChange={handleSpeedChange} aria-label="Playback speed">
+            {SPEED_PRESETS.map((preset) => (
+              <option key={preset.label} value={preset.label}>
+                {preset.label}
+              </option>
+            ))}
+          </select>
 
-        <button className="timeline__now" onClick={toggleLive} aria-pressed={isLive}>
-          Now
-        </button>
+          <button className="timeline__now" onClick={toggleLive} aria-pressed={isLive}>
+            Now
+          </button>
 
-        <button onClick={onOpenSettings} aria-label="Settings" title="Settings">
-          Settings
-        </button>
+          <button onClick={onOpenSettings} aria-label="Settings" title="Settings">
+            Settings
+          </button>
+        </div>
       </div>
-    </div>
+
+      {dateModalOpen && (
+        <JumpToDateModal
+          initialDate={simDate}
+          onSubmit={scrubTo}
+          onClose={() => setDateModalOpen(false)}
+        />
+      )}
+    </Fragment>
   );
 }
