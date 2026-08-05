@@ -17,6 +17,7 @@ export default function App() {
   const [orbitMode, setOrbitMode] = useState<OrbitDisplayMode>("regular");
   const [showAxisLine, setShowAxisLine] = useState(true);
   const [showPlanetLabels, setShowPlanetLabels] = useState(true);
+  const [showZodiac, setShowZodiac] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -32,6 +33,7 @@ export default function App() {
           orbitMode={orbitMode}
           showAxisLine={showAxisLine}
           showPlanetLabels={showPlanetLabels}
+          showZodiac={showZodiac}
         />
         <EffectComposer>
           <Bloom intensity={0.5} luminanceThreshold={0.4} luminanceSmoothing={0.2} mipmapBlur />
@@ -46,6 +48,8 @@ export default function App() {
           onShowAxisLineChange={setShowAxisLine}
           showPlanetLabels={showPlanetLabels}
           onShowPlanetLabelsChange={setShowPlanetLabels}
+          showZodiac={showZodiac}
+          onShowZodiacChange={setShowZodiac}
           orbitMode={orbitMode}
           onOrbitModeChange={setOrbitMode}
           onClose={() => setSettingsOpen(false)}

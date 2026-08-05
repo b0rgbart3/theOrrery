@@ -6,6 +6,8 @@ interface SettingsModalProps {
   onShowAxisLineChange: (show: boolean) => void;
   showPlanetLabels: boolean;
   onShowPlanetLabelsChange: (show: boolean) => void;
+  showZodiac: boolean;
+  onShowZodiacChange: (show: boolean) => void;
   orbitMode: OrbitDisplayMode;
   onOrbitModeChange: (mode: OrbitDisplayMode) => void;
   onClose: () => void;
@@ -16,6 +18,8 @@ export function SettingsModal({
   onShowAxisLineChange,
   showPlanetLabels,
   onShowPlanetLabelsChange,
+  showZodiac,
+  onShowZodiacChange,
   orbitMode,
   onOrbitModeChange,
   onClose,
@@ -39,6 +43,15 @@ export function SettingsModal({
             onChange={(event) => onShowPlanetLabelsChange(event.target.checked)}
           />
           Show planet labels
+        </label>
+
+        <label className="modal__toggle">
+          <input
+            type="checkbox"
+            checked={showZodiac}
+            onChange={(event) => onShowZodiacChange(event.target.checked)}
+          />
+          Show zodiac layer
         </label>
 
         <label className="modal__toggle">

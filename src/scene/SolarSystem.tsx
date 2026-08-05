@@ -3,6 +3,7 @@ import { Sun } from "./Sun";
 import { Planet } from "./Planet";
 import { Moon } from "./Moon";
 import { OrbitPath } from "./OrbitPath";
+import { ZodiacRing } from "./ZodiacRing";
 import { CameraRig } from "./CameraRig";
 import { PlanetLabel } from "./PlanetLabel";
 import { PlanetNameLabel } from "./PlanetNameLabel";
@@ -38,6 +39,7 @@ interface SolarSystemProps {
   orbitMode: OrbitDisplayMode;
   showAxisLine: boolean;
   showPlanetLabels: boolean;
+  showZodiac: boolean;
 }
 
 export function SolarSystem({
@@ -46,6 +48,7 @@ export function SolarSystem({
   orbitMode,
   showAxisLine,
   showPlanetLabels,
+  showZodiac,
 }: SolarSystemProps) {
   // A fixed anchor purely for sampling each orbit's elliptical shape (orbital
   // elements barely change on human timescales) — NOT the moving simulation
@@ -111,6 +114,7 @@ export function SolarSystem({
       <ambientLight intensity={0.1} />
 
       <Sun onFocus={selectSun} />
+      {showZodiac && <ZodiacRing />}
 
       {PLANETS.map((planet) => {
         const isSelected = selection?.key === planet.name;
@@ -126,6 +130,7 @@ export function SolarSystem({
                 referenceDate={orbitShapeReferenceDate}
                 color={planet.color}
                 variant={variant}
+                emphasized={showZodiac}
               />
             )}
             <Planet
@@ -149,6 +154,7 @@ export function SolarSystem({
             referenceDate={orbitShapeReferenceDate}
             color={MOON.color}
             variant={moonOrbitVariant}
+            emphasized={showZodiac}
             // The Moon's orbit (~1.7 scene units) is over an order of
             // magnitude smaller than any planet's — the default dash/arrow
             // sizes (tuned for orbits 16-70 units across) would read as

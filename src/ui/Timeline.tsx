@@ -3,7 +3,7 @@ import { useTimeStore, SPEED_PRESETS } from "../state/timeStore";
 import "./Timeline.scss";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const SCRUB_RANGE_DAYS = 365 * 5; // +/- 5 years around the page's load time
+const SCRUB_RANGE_DAYS = 365 * 100; // +/- 100 years around the page's load time
 
 interface TimelineProps {
   onOpenSettings: () => void;

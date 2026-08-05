@@ -12,7 +12,7 @@ const SUN_ROTATION_PERIOD_HOURS = 609.12;
 // A fixed fraction of the Sun's own radius (a scene-space size, not screen
 // pixels), so the glow scales down with the Sun when you zoom out and stays
 // a thin rim rather than reading as a fat halo relative to the disk.
-const GLOW_THICKNESS_RATIO = 0.12;
+const GLOW_THICKNESS_RATIO = 0.084;
 const GLOW_SCALE = (SUN_RADIUS + SUN_RADIUS * GLOW_THICKNESS_RATIO) / SUN_RADIUS;
 const GLOW_COLOR = new Color("#ffcc77");
 

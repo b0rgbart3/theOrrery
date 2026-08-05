@@ -29,12 +29,21 @@ const LINE_STYLE: Record<OrbitVariant, { lineWidth: number; opacity: number }> =
     bright: { lineWidth: 0.2, opacity: 0.7 },
   };
 
+// The zodiac wheel's artwork and color wedges are busy enough to wash out
+// the normal thin, colored, dashed orbit lines — thicker than any regular
+// variant, fully opaque, and solid white cuts through that clutter instead
+// of blending into it.
+const EMPHASIZED_STYLE = { lineWidth: 0.35, opacity: 1 };
+const EMPHASIZED_COLOR = "white";
+
 interface OrbitPathProps {
   getPosition: (date: Date) => [number, number, number];
   orbitalPeriodDays: number;
   referenceDate: Date;
   color: string;
   variant: OrbitVariant;
+  /** Overrides color/width/opacity/dashing to a solid thick white line, e.g. while the zodiac layer is on and needs the orbits to stay legible over it. */
+  emphasized?: boolean;
   /**
    * When set, `getPosition` is sampled relative to this moving center (e.g.
    * the Moon's orbit is shaped around Earth, not the Sun) and the whole
@@ -64,6 +73,7 @@ export function OrbitPath({
   referenceDate,
   color,
   variant,
+  emphasized = false,
   followCenter,
   segments = DEFAULT_SEGMENTS,
   arrowCount = DEFAULT_ARROW_COUNT,
@@ -116,17 +126,18 @@ export function OrbitPath({
     groupRef.current.position.set(...followCenter(simDate));
   });
 
-  const { lineWidth, opacity } = LINE_STYLE[variant];
+  const { lineWidth, opacity } = emphasized ? EMPHASIZED_STYLE : LINE_STYLE[variant];
+  const lineColor = emphasized ? EMPHASIZED_COLOR : color;
 
   return (
     <group ref={groupRef}>
       <Line
         points={points}
-        color={color}
+        color={lineColor}
         lineWidth={lineWidth}
         transparent
         opacity={opacity}
-        dashed
+        dashed={!emphasized}
         dashSize={dashSize}
         gapSize={gapSize}
       />
@@ -136,7 +147,7 @@ export function OrbitPath({
           points={chevronPoints}
           position={arrow.position}
           quaternion={arrow.quaternion}
-          color={color}
+          color={lineColor}
           lineWidth={lineWidth}
           transparent
           opacity={opacity}
