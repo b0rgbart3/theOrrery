@@ -47,12 +47,16 @@ npm run dev
 
 Then open the printed local URL (typically http://localhost:5173).
 
+You can also control the speed of time, and even reverse it, by using the timeline at the bottom
+of the screen. You can also toggle on and off various features of the Orrery, such as the zodiac
+ring, planetary zodiac rays, and more, by clicking on the settings button in the top right corner.
+
 ## Zodiac layers
 
 The app has two, mutually-exclusive zodiac overlays (Settings panel), reflecting two genuinely
 different astronomical quantities:
 
-- **Zodiac layer (Earth)** — a ring centered on the **Sun**, plotting each planet's
+- **Heliocentric Zodiac layer** — a ring centered on the **Sun**, plotting each planet's
   **heliocentric** position (its direction as seen from the Sun). This happens to give the correct
   traditional "sun sign" for Earth itself: Earth's heliocentric position and the Sun's geocentric
   position (the one astrology actually uses) always sit exactly opposite one another, so the
@@ -69,8 +73,37 @@ different astronomical quantities:
   each ray also carries a second "distance" marker, at the planet's real Earth-relative distance
   under that same compression, linked back to the planet's mesh with a short connecting line.
 
-Selecting the Earth layer clears any selected planets and vice versa, since only one ring can be
-shown at a time — see the in-app About panel for the full explanation with a diagram.
+Selecting the Heliocentric layer clears any selected planets and vice versa, since only one ring
+can be shown at a time — see the in-app About panel for the full explanation with a diagram.
+
+### Geocentric vs. heliocentric astrology
+
+Why do we use a geocentric zodiac model, and why are horoscopes almost exclusively geocentric?
+Because astrology interprets planetary movements and celestial events based on how they are
+experienced from *Earth*, astrological charts are calculated using Earth as the fixed central
+point.
+
+- **Geocentric (Earth-centered)** — standard astrological horoscopes map the positions of the
+  Sun, Moon, and planets against the backdrop of the zodiac from an Earth-bound perspective.
+  Concepts central to traditional astrology — such as apparent planetary retrograde motion, the
+  Horizon (Ascendant/Descendant), and the House system — rely on an Earth-centered point of view.
+- **Heliocentric (Sun-centered)** — while rare, heliocentric horoscopes do exist within niche
+  branches of modern astrology and financial astrology. In a heliocentric chart, the Sun is
+  placed at the center, Earth is plotted as a planet opposite the Sun, and retrograde motion
+  disappears since all planets orbit the Sun in the same direction. If you want to chart that,
+  use the Heliocentric Zodiac layer in this Orrery to see the planets' positions from the Sun's
+  perspective.
+
+### Why is this a useful fiction?
+
+This Orrery, like any orrery, is a fiction — a simplified model, not a literal picture of the
+solar system or of astrology's underlying celestial mechanics. But the relationships between the
+two zodiac systems shown here are genuinely complex, and hard to hold in your head from
+description alone. The goal of this Orrery is to make those relationships **visible** and
+animated over time, as a way of seeing and understanding those movements rather than just reading
+about them. That's especially useful for something like retrograde motion — watching it play out
+visually makes it much easier to understand why, for example, Mercury appears to go retrograde
+more often than the other planets do.
 
 ## Assets
 

@@ -4,6 +4,7 @@ import { Color, DoubleSide, RingGeometry } from "three";
 import { SUN_RADIUS, auToScene } from "../astronomy/scale";
 import { PLANETS } from "../data/planets";
 import { SIGN_NAMES } from "../data/zodiac";
+import { ZODIAC_IMAGE_OPTIONS, type ZodiacImageStyle } from "./zodiacDisplay";
 
 // Flush with the Sun's surface on the inside, out to Neptune's orbit (the
 // outermost ring in the scene) on the outside.
@@ -33,6 +34,10 @@ interface ZodiacRingProps {
    * two are never shown at the same time.
    */
   offsetDeg?: number;
+  /** Whether to draw the twelve color-coded sign wedges under the artwork. */
+  showRainbow?: boolean;
+  /** Which zodiac artwork texture to layer on top of the wedges. */
+  imageStyle?: ZodiacImageStyle;
 }
 
 // Evenly spaced hues around the color wheel, so the twelve signs read as a
@@ -68,6 +73,17 @@ function buildSigns(offsetDeg: number) {
 // plain color wedges below.
 const ARIES_IMAGE_ANGLE_DEG = 90;
 
+// Both zodiac.png and zodiac_outer_ring.png were exported with identical
+// padding around the printed artwork: its opaque content only fills ~88.3%
+// of the square canvas (measured from each PNG's alpha-channel bounding
+// box), so RingGeometry's straight vertex/outerRadius UV mapping leaves the
+// artwork's outer white border sitting visibly inside the rainbow wedges'
+// true OUTER_RADIUS edge. Sampling just that central 88.3% of the texture
+// and stretching it to fill the full 0-1 UV square crops the padding out,
+// so the artwork's edge lines up with the wedges' edge, without having to
+// re-export either source image.
+const CONTENT_UV_SCALE = 1526 / 1728;
+
 // A flat wheel offset straight down from the Sun's equatorial plane by a
 // full solar radius, so it sits tangent to the Sun's bottom rather than
 // slicing through it (and through every planet, which all orbit close to
@@ -77,8 +93,17 @@ const ARIES_IMAGE_ANGLE_DEG = 90;
 // kept out of raycasting so they never steal clicks from the Sun or
 // planets, and depthWrite is off so they can't z-fight with them (or each
 // other).
-export function ZodiacRing({ offsetDeg = 180 }: ZodiacRingProps) {
-  const texture = useTexture("/textures/zodiac.png");
+export function ZodiacRing({
+  offsetDeg = 180,
+  showRainbow = true,
+  imageStyle = "classic",
+}: ZodiacRingProps) {
+  const imageSrc =
+    ZODIAC_IMAGE_OPTIONS.find((option) => option.style === imageStyle)?.src ??
+    ZODIAC_IMAGE_OPTIONS[0].src;
+  const texture = useTexture(imageSrc);
+  texture.center.set(0.5, 0.5);
+  texture.repeat.set(CONTENT_UV_SCALE, CONTENT_UV_SCALE);
 
   const signs = useMemo(() => buildSigns(offsetDeg), [offsetDeg]);
   const textureSpinRad = ((15 + offsetDeg - ARIES_IMAGE_ANGLE_DEG) * Math.PI) / 180;
@@ -101,17 +126,18 @@ export function ZodiacRing({ offsetDeg = 180 }: ZodiacRingProps) {
 
   return (
     <group position={[0, -SUN_RADIUS, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-      {signs.map((sign, i) => (
-        <mesh key={sign.name} geometry={geometries[i]} raycast={() => null}>
-          <meshBasicMaterial
-            color={sign.color}
-            transparent
-            opacity={0.075}
-            side={DoubleSide}
-            depthWrite={false}
-          />
-        </mesh>
-      ))}
+      {showRainbow &&
+        signs.map((sign, i) => (
+          <mesh key={sign.name} geometry={geometries[i]} raycast={() => null}>
+            <meshBasicMaterial
+              color={sign.color}
+              transparent
+              opacity={0.075}
+              side={DoubleSide}
+              depthWrite={false}
+            />
+          </mesh>
+        ))}
       <mesh rotation={[0, 0, textureSpinRad]} raycast={() => null}>
         <ringGeometry args={[INNER_RADIUS, OUTER_RADIUS, SEGMENTS]} />
         <meshBasicMaterial

@@ -138,6 +138,17 @@
   &__paragraph {
     margin: 0;
     line-height: 1.6;
+
+    &--indented {
+      margin-left: 1.5rem;
+    }
+  }
+
+  &__subheading {
+    margin: 1rem 0 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $color-text-primary;
   }
 
   &__controls {

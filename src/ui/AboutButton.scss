@@ -1,0 +1,30 @@
+@use "../styles/tokens" as *;
+
+.about-button {
+  position: fixed;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 10;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background: $color-control-bg;
+  border: 1px solid $color-border-control;
+  color: $color-text-primary;
+  font-family: $font-body;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:hover {
+    background: $color-control-bg-hover;
+  }
+
+  @media (max-width: 600px) {
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}

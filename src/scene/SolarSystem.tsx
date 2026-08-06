@@ -19,6 +19,7 @@ import { planetFacts, SUN_FACTS, MOON_FACTS } from "../data/facts";
 import { useTimeStore } from "../state/timeStore";
 import type { Selection } from "./selection";
 import type { OrbitDisplayMode, OrbitVariant } from "./orbitDisplay";
+import type { ZodiacImageStyle } from "./zodiacDisplay";
 
 // Comfortably larger than the outermost orbit (Neptune) so the default,
 // nothing-selected view frames the whole system rather than the tighter
@@ -45,6 +46,8 @@ interface SolarSystemProps {
   showZodiac: boolean;
   showPlanetaryZodiac: boolean;
   planetaryZodiacPlanets: string[];
+  showZodiacRainbow: boolean;
+  zodiacImageStyle: ZodiacImageStyle;
 }
 
 export function SolarSystem({
@@ -56,6 +59,8 @@ export function SolarSystem({
   showZodiac,
   showPlanetaryZodiac,
   planetaryZodiacPlanets,
+  showZodiacRainbow,
+  zodiacImageStyle,
 }: SolarSystemProps) {
   // A fixed anchor purely for sampling each orbit's elliptical shape (orbital
   // elements barely change on human timescales) — NOT the moving simulation
@@ -119,6 +124,11 @@ export function SolarSystem({
   }
 
   const showOrbit = orbitMode !== "hidden";
+  // Only the rainbow wedges are busy enough to wash out the normal thin,
+  // colored, dashed orbit lines -- with just the artwork ring (rainbow off),
+  // orbits stay legible in their regular per-planet color/style, so forcing
+  // them white is reserved for when the wedges are actually on screen.
+  const emphasizeOrbits = (showZodiac || showPlanetaryZodiac) && showZodiacRainbow;
   const isMoonSelected = selection?.key === "Moon";
   const moonOrbitVariant: OrbitVariant =
     orbitMode === "selected" ? (isMoonSelected ? "xbright" : "dim") : (orbitMode as OrbitVariant);
@@ -131,12 +141,22 @@ export function SolarSystem({
       <ambientLight intensity={0.1} />
 
       <Sun onFocus={selectSun} />
-      {showZodiac && !showPlanetaryZodiac && <ZodiacRing offsetDeg={180} />}
+      {showZodiac && !showPlanetaryZodiac && (
+        <ZodiacRing
+          offsetDeg={180}
+          showRainbow={showZodiacRainbow}
+          imageStyle={zodiacImageStyle}
+        />
+      )}
       {showPlanetaryZodiac && (
         // Centered on Earth (not the Sun) so a ray from Earth crosses this
         // ring at exactly its own true direction -- see PlanetZodiacRay.tsx.
         <FollowBody getPosition={(date) => heliocentricScenePosition("Earth", date)}>
-          <ZodiacRing offsetDeg={0} />
+          <ZodiacRing
+            offsetDeg={0}
+            showRainbow={showZodiacRainbow}
+            imageStyle={zodiacImageStyle}
+          />
           {planetaryZodiacPlanets.map((planetName) => {
             const planet = PLANETS.find((p) => p.name === planetName);
             return planet ? (
@@ -160,7 +180,7 @@ export function SolarSystem({
                 referenceDate={orbitShapeReferenceDate}
                 color={planet.color}
                 variant={variant}
-                emphasized={showZodiac || showPlanetaryZodiac}
+                emphasized={emphasizeOrbits}
               />
             )}
             <Planet
@@ -188,7 +208,7 @@ export function SolarSystem({
             referenceDate={orbitShapeReferenceDate}
             color={MOON.color}
             variant={moonOrbitVariant}
-            emphasized={showZodiac || showPlanetaryZodiac}
+            emphasized={emphasizeOrbits}
             // The Moon's orbit (~1.7 scene units) is over an order of
             // magnitude smaller than any planet's — the default dash/arrow
             // sizes (tuned for orbits 16-70 units across) would read as

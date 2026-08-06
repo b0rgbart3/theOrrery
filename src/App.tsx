@@ -6,8 +6,10 @@ import { SolarSystem } from "./scene/SolarSystem";
 import { ViewportShift } from "./scene/ViewportShift";
 import type { Selection } from "./scene/selection";
 import type { OrbitDisplayMode } from "./scene/orbitDisplay";
+import type { ZodiacImageStyle } from "./scene/zodiacDisplay";
 import { Timeline } from "./ui/Timeline";
 import { Title } from "./ui/Title";
+import { AboutButton } from "./ui/AboutButton";
 import { InfoPanel } from "./ui/InfoPanel";
 import { SettingsModal } from "./ui/SettingsModal";
 import { Loader } from "./ui/Loader";
@@ -19,6 +21,8 @@ export default function App() {
   const [showPlanetLabels, setShowPlanetLabels] = useState(true);
   const [showZodiac, setShowZodiac] = useState(false);
   const [planetaryZodiacPlanets, setPlanetaryZodiacPlanets] = useState<string[]>([]);
+  const [showZodiacRainbow, setShowZodiacRainbow] = useState(true);
+  const [zodiacImageStyle, setZodiacImageStyle] = useState<ZodiacImageStyle>("classic");
   // Only one zodiac ring can ever be shown at once (see ZodiacRing.tsx --
   // the Earth-season and true rings are 180 deg apart), so these two are
   // kept mutually exclusive by auto-toggling the other off, rather than by
@@ -63,6 +67,8 @@ export default function App() {
           showZodiac={showZodiac}
           showPlanetaryZodiac={showPlanetaryZodiac}
           planetaryZodiacPlanets={planetaryZodiacPlanets}
+          showZodiacRainbow={showZodiacRainbow}
+          zodiacImageStyle={zodiacImageStyle}
         />
         <EffectComposer>
           <Bloom intensity={0.5} luminanceThreshold={0.4} luminanceSmoothing={0.2} mipmapBlur />
@@ -70,6 +76,7 @@ export default function App() {
       </Canvas>
       <Loader />
       <Title onClick={() => setAboutOpen(true)} />
+      <AboutButton onClick={() => setAboutOpen(true)} />
       <InfoPanel aboutOpen={aboutOpen} onAboutOpenChange={setAboutOpen} />
       {settingsOpen && (
         <SettingsModal
@@ -81,6 +88,10 @@ export default function App() {
           onShowZodiacChange={handleShowZodiacChange}
           planetaryZodiacPlanets={planetaryZodiacPlanets}
           onTogglePlanetaryZodiacPlanet={handleTogglePlanetaryZodiacPlanet}
+          showZodiacRainbow={showZodiacRainbow}
+          onShowZodiacRainbowChange={setShowZodiacRainbow}
+          zodiacImageStyle={zodiacImageStyle}
+          onZodiacImageStyleChange={setZodiacImageStyle}
           orbitMode={orbitMode}
           onOrbitModeChange={setOrbitMode}
           onClose={() => setSettingsOpen(false)}
