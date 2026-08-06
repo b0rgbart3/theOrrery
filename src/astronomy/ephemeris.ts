@@ -94,6 +94,40 @@ export function moonOrientationQuaternion(date: Date): Quaternion {
   return new Quaternion().setFromRotationMatrix(new Matrix4().makeBasis(xAxis, yAxis, zAxis));
 }
 
+// The planet's true astrological sign: geocentric ecliptic longitude (the
+// Earth->planet direction, in the standard 0-360, 0=Aries convention) rather
+// than the heliocentric longitude used elsewhere in this file for scene
+// placement. Despite its name, astronomy-engine's own `EclipticLongitude`
+// function is actually HELIOCENTRIC (Sun->body; it even throws for the Sun
+// itself) -- the geocentric value needed here instead comes from GeoVector
+// (Earth->body, with aberration correction for the body's true apparent
+// position) run through Ecliptic(). No manual vector subtraction or
+// Earth-only 180 deg offset (see ZodiacRing.tsx) is needed for this one.
+export function geocentricEclipticLongitudeDeg(planetName: string, date: Date): number {
+  const body = Astronomy.Body[planetName as keyof typeof Astronomy.Body];
+  const geoVector = Astronomy.GeoVector(body, date, true);
+  return Astronomy.Ecliptic(geoVector).elon;
+}
+
+// The real Earth->planet distance in AU -- used to place a secondary marker
+// along a PlanetZodiacRay at the same visually-compressed distance the rest
+// of the scene uses (see auToScene in scale.ts), rather than always at the
+// ring's fixed outer edge.
+export function geocentricDistanceAu(planetName: string, date: Date): number {
+  const body = Astronomy.Body[planetName as keyof typeof Astronomy.Body];
+  return Astronomy.GeoVector(body, date, true).Length();
+}
+
+// Earth has no meaningful geocentric longitude relative to itself (the
+// Earth->Earth vector is zero), so "Earth's sign" instead means what that
+// phrase means colloquially and astrologically: the Sun's own apparent
+// (geocentric) tropical sign -- the traditional birthday-based "sun sign,"
+// which is exactly the quantity ZodiacRing's Earth-season ring (offsetDeg
+// 180) is already positioned around.
+export function sunEclipticLongitudeDeg(date: Date): number {
+  return Astronomy.SunPosition(date).elon;
+}
+
 // Position for any selection key: a known planet name resolves to its live
 // position, "Moon" tracks Earth's position plus its own geocentric offset,
 // anything else (the Sun, "overview") is the origin — the Sun sits at the

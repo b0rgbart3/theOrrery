@@ -112,6 +112,22 @@
     }
   }
 
+  &__section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid $color-border;
+  }
+
+  &__section-image {
+    display: block;
+    width: 100%;
+    max-width: 680px;
+    height: auto;
+    margin: 1.25rem auto;
+    border-radius: 8px;
+    border: 1px solid $color-border;
+  }
+
   &__subtitle {
     margin: 1.5rem 0 0.5rem;
     font-size: 1.05rem;
@@ -180,6 +196,24 @@
       padding: 0.25rem 0.4rem;
       cursor: pointer;
     }
+  }
+
+  &__sublist {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-left: 1.7rem;
+  }
+
+  &__sublist-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $color-text-muted;
+  }
+
+  &__toggle--sub {
+    font-weight: 400;
+    font-size: 0.8rem;
   }
 
   &__credit {

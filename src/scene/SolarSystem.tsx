@@ -4,10 +4,13 @@ import { Planet } from "./Planet";
 import { Moon } from "./Moon";
 import { OrbitPath } from "./OrbitPath";
 import { ZodiacRing } from "./ZodiacRing";
+import { PlanetZodiacRay } from "./PlanetZodiacRay";
 import { CameraRig } from "./CameraRig";
 import { PlanetLabel } from "./PlanetLabel";
 import { PlanetNameLabel } from "./PlanetNameLabel";
 import { TimeDriver } from "./TimeDriver";
+import { useMoonVisibility } from "./useMoonVisibility";
+import { FollowBody } from "./FollowBody";
 import { PLANETS, type PlanetData } from "../data/planets";
 import { MOON } from "../data/moon";
 import { auToScene, radiusKmToScene, moonRadiusToScene, SUN_RADIUS } from "../astronomy/scale";
@@ -40,6 +43,8 @@ interface SolarSystemProps {
   showAxisLine: boolean;
   showPlanetLabels: boolean;
   showZodiac: boolean;
+  showPlanetaryZodiac: boolean;
+  planetaryZodiacPlanets: string[];
 }
 
 export function SolarSystem({
@@ -49,6 +54,8 @@ export function SolarSystem({
   showAxisLine,
   showPlanetLabels,
   showZodiac,
+  showPlanetaryZodiac,
+  planetaryZodiacPlanets,
 }: SolarSystemProps) {
   // A fixed anchor purely for sampling each orbit's elliptical shape (orbital
   // elements barely change on human timescales) — NOT the moving simulation
@@ -68,7 +75,17 @@ export function SolarSystem({
   // the already-selected body, which is how the tooltip toggles back on.
   const [tooltipDismissed, setTooltipDismissed] = useState(false);
 
-  const showTooltip = selection !== null && !isPlaying && !isScrubbing && !tooltipDismissed;
+  const moonVisible = useMoonVisibility();
+
+  // If the Moon was selected while zoomed in and the user then scrolls back
+  // out past the hide threshold, its tooltip would otherwise keep floating
+  // with no visible body to anchor to.
+  const showTooltip =
+    selection !== null &&
+    !isPlaying &&
+    !isScrubbing &&
+    !tooltipDismissed &&
+    (selection.key !== "Moon" || moonVisible);
 
   // Clicking the already-selected body toggles its tooltip off (and a
   // repeat click brings it back) instead of just re-showing it — this is
@@ -104,7 +121,7 @@ export function SolarSystem({
   const showOrbit = orbitMode !== "hidden";
   const isMoonSelected = selection?.key === "Moon";
   const moonOrbitVariant: OrbitVariant =
-    orbitMode === "selected" ? (isMoonSelected ? "bright" : "regular") : (orbitMode as OrbitVariant);
+    orbitMode === "selected" ? (isMoonSelected ? "xbright" : "dim") : (orbitMode as OrbitVariant);
 
   return (
     <>
@@ -114,12 +131,25 @@ export function SolarSystem({
       <ambientLight intensity={0.1} />
 
       <Sun onFocus={selectSun} />
-      {showZodiac && <ZodiacRing />}
+      {showZodiac && !showPlanetaryZodiac && <ZodiacRing offsetDeg={180} />}
+      {showPlanetaryZodiac && (
+        // Centered on Earth (not the Sun) so a ray from Earth crosses this
+        // ring at exactly its own true direction -- see PlanetZodiacRay.tsx.
+        <FollowBody getPosition={(date) => heliocentricScenePosition("Earth", date)}>
+          <ZodiacRing offsetDeg={0} />
+          {planetaryZodiacPlanets.map((planetName) => {
+            const planet = PLANETS.find((p) => p.name === planetName);
+            return planet ? (
+              <PlanetZodiacRay key={planetName} planetName={planetName} color={planet.color} />
+            ) : null;
+          })}
+        </FollowBody>
+      )}
 
       {PLANETS.map((planet) => {
         const isSelected = selection?.key === planet.name;
         const variant: OrbitVariant =
-          orbitMode === "selected" ? (isSelected ? "bright" : "regular") : (orbitMode as OrbitVariant);
+          orbitMode === "selected" ? (isSelected ? "xbright" : "dim") : (orbitMode as OrbitVariant);
 
         return (
           <group key={planet.name}>
@@ -130,7 +160,7 @@ export function SolarSystem({
                 referenceDate={orbitShapeReferenceDate}
                 color={planet.color}
                 variant={variant}
-                emphasized={showZodiac}
+                emphasized={showZodiac || showPlanetaryZodiac}
               />
             )}
             <Planet
@@ -139,14 +169,18 @@ export function SolarSystem({
               showAxisLine={showAxisLine}
             />
             {showPlanetLabels && (
-              <PlanetNameLabel planetName={planet.name} radius={radiusKmToScene(planet.radiusKm)} />
+              <PlanetNameLabel
+                planetName={planet.name}
+                radius={radiusKmToScene(planet.radiusKm)}
+                showZodiacSign={showZodiac || showPlanetaryZodiac}
+              />
             )}
           </group>
         );
       })}
 
       <group>
-        {showOrbit && (
+        {showOrbit && moonVisible && (
           <OrbitPath
             getPosition={moonSceneOffsetFromEarth}
             followCenter={(date) => heliocentricScenePosition("Earth", date)}
@@ -154,7 +188,7 @@ export function SolarSystem({
             referenceDate={orbitShapeReferenceDate}
             color={MOON.color}
             variant={moonOrbitVariant}
-            emphasized={showZodiac}
+            emphasized={showZodiac || showPlanetaryZodiac}
             // The Moon's orbit (~1.7 scene units) is over an order of
             // magnitude smaller than any planet's — the default dash/arrow
             // sizes (tuned for orbits 16-70 units across) would read as
@@ -168,9 +202,13 @@ export function SolarSystem({
             arrowLength={0.05}
           />
         )}
-        <Moon onFocus={selectMoon} showAxisLine={showAxisLine} />
-        {showPlanetLabels && (
-          <PlanetNameLabel planetName="Moon" radius={moonRadiusToScene(MOON.radiusKm)} />
+        {moonVisible && <Moon onFocus={selectMoon} showAxisLine={showAxisLine} />}
+        {showPlanetLabels && moonVisible && (
+          <PlanetNameLabel
+            planetName="Moon"
+            radius={moonRadiusToScene(MOON.radiusKm)}
+            showZodiacSign={showZodiac}
+          />
         )}
       </group>
 

@@ -3,21 +3,7 @@ import { useTexture } from "@react-three/drei";
 import { Color, DoubleSide, RingGeometry } from "three";
 import { SUN_RADIUS, auToScene } from "../astronomy/scale";
 import { PLANETS } from "../data/planets";
-
-const SIGN_NAMES = [
-  "Aries",
-  "Taurus",
-  "Gemini",
-  "Cancer",
-  "Leo",
-  "Virgo",
-  "Libra",
-  "Scorpio",
-  "Sagittarius",
-  "Capricorn",
-  "Aquarius",
-  "Pisces",
-];
+import { SIGN_NAMES } from "../data/zodiac";
 
 // Flush with the Sun's surface on the inside, out to Neptune's orbit (the
 // outermost ring in the scene) on the outside.
@@ -28,27 +14,41 @@ const SEGMENTS = 128;
 const SLICE_ANGLE = (Math.PI * 2) / SIGN_NAMES.length;
 const SEGMENTS_PER_SLICE = 12;
 
-// The tropical zodiac's dates (e.g. Leo = Jul 23-Aug 22) are defined by the
-// Sun's GEOCENTRIC longitude — Aries at [0, 30) deg means the Sun, seen from
-// Earth, is there. But this ring is drawn in the Sun's own (heliocentric)
-// frame, where Earth sits 180 deg away from wherever the Sun appears from
-// Earth's point of view. So on Aug 4 (Leo season), Earth's actual
-// heliocentric longitude is ~180 deg past the Sun's geocentric longitude,
-// not equal to it — without this offset, Earth would visibly sit in
-// whichever wedge is opposite the correct sign.
-const HELIOCENTRIC_OFFSET_RAD = Math.PI;
+interface ZodiacRingProps {
+  /**
+   * 180 (the default "Earth season" ring): the tropical zodiac's dates (e.g.
+   * Leo = Jul 23-Aug 22) are defined by the Sun's GEOCENTRIC longitude —
+   * Aries at [0, 30) deg means the Sun, seen from Earth, is there. But this
+   * ring is drawn in the Sun's own (heliocentric) frame, where Earth sits
+   * 180 deg away from wherever the Sun appears from Earth's point of view.
+   * So on Aug 4 (Leo season), Earth's actual heliocentric longitude is ~180
+   * deg past the Sun's geocentric longitude, not equal to it — without this
+   * offset, Earth would visibly sit in whichever wedge is opposite the
+   * correct sign.
+   *
+   * 0 (the "true" ring): wedges sit at their real, unshifted geocentric
+   * longitude — the orientation a ray from Earth through another planet
+   * needs to cross the wedge matching that planet's actual sign. This ring
+   * is 180 deg (6 signs) rotated from the Earth-season ring above, so the
+   * two are never shown at the same time.
+   */
+  offsetDeg?: number;
+}
 
 // Evenly spaced hues around the color wheel, so the twelve signs read as a
-// classic zodiac wheel even before the artwork on top is considered. Sign i
-// spans heliocentric-longitude angle [i*30+180, i*30+210) degrees, i.e.
-// Aries at [180, 210) — the wedge Earth actually sits in during Aries
-// season (Mar 21-Apr 19), 180 deg from Aries's own [0, 30) tropical
-// definition (see HELIOCENTRIC_OFFSET_RAD above).
-const SIGNS = SIGN_NAMES.map((name, i) => ({
-  name,
-  color: new Color().setHSL(i / SIGN_NAMES.length, 0.55, 0.55),
-  thetaStart: i * SLICE_ANGLE + HELIOCENTRIC_OFFSET_RAD,
-}));
+// classic zodiac wheel even before the artwork on top is considered. With
+// offsetDeg=180, sign i spans heliocentric-longitude angle [i*30+180,
+// i*30+210) degrees, i.e. Aries at [180, 210) — the wedge Earth actually
+// sits in during Aries season (Mar 21-Apr 19), 180 deg from Aries's own
+// [0, 30) tropical definition (see ZodiacRingProps.offsetDeg above).
+function buildSigns(offsetDeg: number) {
+  const offsetRad = (offsetDeg * Math.PI) / 180;
+  return SIGN_NAMES.map((name, i) => ({
+    name,
+    color: new Color().setHSL(i / SIGN_NAMES.length, 0.55, 0.55),
+    thetaStart: i * SLICE_ANGLE + offsetRad,
+  }));
+}
 
 // RingGeometry's default UVs project the flat XY vertex position straight
 // onto the texture square (u,v = vertex/outerRadius, remapped to 0-1) — the
@@ -60,16 +60,13 @@ const SIGNS = SIGN_NAMES.map((name, i) => ({
 // exactly on heliocentric-longitude 0 once flattened into the scene's XZ
 // plane (rotation-x below). In the source artwork, Aries is centered at the
 // top of the image (local angle 90 deg, where RingGeometry's UV formula
-// puts v=1). We want that Aries-center point to end up at 195 deg — the
-// midpoint of Aries's real [180, 210) heliocentric-longitude span above,
-// not 15 — so spinning the artwork by (195-90) deg around the ring's own
+// puts v=1). We want that Aries-center point to end up at (15 + offsetDeg)
+// deg — the midpoint of Aries's real [offsetDeg, offsetDeg+30) span above,
+// not 15 — so spinning the artwork by that amount around the ring's own
 // normal (z, applied before the flatten since three's default Euler order
 // is XYZ) lines up every sign's wedge and printed date range with the
 // plain color wedges below.
 const ARIES_IMAGE_ANGLE_DEG = 90;
-const ARIES_CENTER_LONGITUDE_DEG = 195;
-const TEXTURE_SPIN_RAD =
-  ((ARIES_CENTER_LONGITUDE_DEG - ARIES_IMAGE_ANGLE_DEG) * Math.PI) / 180;
 
 // A flat wheel offset straight down from the Sun's equatorial plane by a
 // full solar radius, so it sits tangent to the Sun's bottom rather than
@@ -80,12 +77,15 @@ const TEXTURE_SPIN_RAD =
 // kept out of raycasting so they never steal clicks from the Sun or
 // planets, and depthWrite is off so they can't z-fight with them (or each
 // other).
-export function ZodiacRing() {
+export function ZodiacRing({ offsetDeg = 180 }: ZodiacRingProps) {
   const texture = useTexture("/textures/zodiac.png");
+
+  const signs = useMemo(() => buildSigns(offsetDeg), [offsetDeg]);
+  const textureSpinRad = ((15 + offsetDeg - ARIES_IMAGE_ANGLE_DEG) * Math.PI) / 180;
 
   const geometries = useMemo(
     () =>
-      SIGNS.map(
+      signs.map(
         (sign) =>
           new RingGeometry(
             INNER_RADIUS,
@@ -96,28 +96,28 @@ export function ZodiacRing() {
             SLICE_ANGLE,
           ),
       ),
-    [],
+    [signs],
   );
 
   return (
     <group position={[0, -SUN_RADIUS, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-      {SIGNS.map((sign, i) => (
+      {signs.map((sign, i) => (
         <mesh key={sign.name} geometry={geometries[i]} raycast={() => null}>
           <meshBasicMaterial
             color={sign.color}
             transparent
-            opacity={0.05}
+            opacity={0.075}
             side={DoubleSide}
             depthWrite={false}
           />
         </mesh>
       ))}
-      <mesh rotation={[0, 0, TEXTURE_SPIN_RAD]} raycast={() => null}>
+      <mesh rotation={[0, 0, textureSpinRad]} raycast={() => null}>
         <ringGeometry args={[INNER_RADIUS, OUTER_RADIUS, SEGMENTS]} />
         <meshBasicMaterial
           map={texture}
           transparent
-          opacity={0.27}
+          opacity={0.3}
           side={DoubleSide}
           depthWrite={false}
         />

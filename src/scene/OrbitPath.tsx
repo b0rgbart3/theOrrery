@@ -24,9 +24,10 @@ const DEFAULT_ARROW_LENGTH = 0.22;
 // "regular"'s weight.
 const LINE_STYLE: Record<OrbitVariant, { lineWidth: number; opacity: number }> =
   {
-    dim: { lineWidth: 0.1, opacity: 0.3 },
-    regular: { lineWidth: 0.15, opacity: 0.5 },
-    bright: { lineWidth: 0.2, opacity: 0.7 },
+    dim: { lineWidth: 0.3, opacity: 0.6 },
+    regular: { lineWidth: 0.6, opacity: 0.8 },
+    bright: { lineWidth: 1, opacity: 1 },
+    xbright: { lineWidth: 1.5, opacity: 1 },
   };
 
 // The zodiac wheel's artwork and color wedges are busy enough to wash out
@@ -126,7 +127,9 @@ export function OrbitPath({
     groupRef.current.position.set(...followCenter(simDate));
   });
 
-  const { lineWidth, opacity } = emphasized ? EMPHASIZED_STYLE : LINE_STYLE[variant];
+  const { lineWidth, opacity } = emphasized
+    ? EMPHASIZED_STYLE
+    : LINE_STYLE[variant];
   const lineColor = emphasized ? EMPHASIZED_COLOR : color;
 
   return (

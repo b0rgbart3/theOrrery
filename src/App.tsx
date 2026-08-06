@@ -18,6 +18,14 @@ export default function App() {
   const [showAxisLine, setShowAxisLine] = useState(true);
   const [showPlanetLabels, setShowPlanetLabels] = useState(true);
   const [showZodiac, setShowZodiac] = useState(false);
+  const [planetaryZodiacPlanets, setPlanetaryZodiacPlanets] = useState<string[]>([]);
+  // Only one zodiac ring can ever be shown at once (see ZodiacRing.tsx --
+  // the Earth-season and true rings are 180 deg apart), so these two are
+  // kept mutually exclusive by auto-toggling the other off, rather than by
+  // disabling checkboxes -- either can be turned on freely, and doing so
+  // just quietly turns the other off instead of landing in a dead state
+  // where a checkbox is checked but nothing it controls is visible.
+  const showPlanetaryZodiac = planetaryZodiacPlanets.length > 0;
   const [aboutOpen, setAboutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { active, progress } = useProgress();
@@ -25,7 +33,19 @@ export default function App() {
 
   const handleShowZodiacChange = (show: boolean) => {
     setShowZodiac(show);
-    if (show) setOrbitMode("hidden");
+    const nextPlanetaryPlanets = show ? [] : planetaryZodiacPlanets;
+    if (show) setPlanetaryZodiacPlanets([]);
+    setOrbitMode(show || nextPlanetaryPlanets.length > 0 ? "hidden" : "regular");
+  };
+
+  const handleTogglePlanetaryZodiacPlanet = (planetName: string, show: boolean) => {
+    const nextPlanets = show
+      ? [...planetaryZodiacPlanets, planetName]
+      : planetaryZodiacPlanets.filter((name) => name !== planetName);
+    setPlanetaryZodiacPlanets(nextPlanets);
+    const nextShowZodiac = show ? false : showZodiac;
+    if (show) setShowZodiac(false);
+    setOrbitMode(nextShowZodiac || nextPlanets.length > 0 ? "hidden" : "regular");
   };
 
   return (
@@ -41,6 +61,8 @@ export default function App() {
           showAxisLine={showAxisLine}
           showPlanetLabels={showPlanetLabels}
           showZodiac={showZodiac}
+          showPlanetaryZodiac={showPlanetaryZodiac}
+          planetaryZodiacPlanets={planetaryZodiacPlanets}
         />
         <EffectComposer>
           <Bloom intensity={0.5} luminanceThreshold={0.4} luminanceSmoothing={0.2} mipmapBlur />
@@ -57,6 +79,8 @@ export default function App() {
           onShowPlanetLabelsChange={setShowPlanetLabels}
           showZodiac={showZodiac}
           onShowZodiacChange={handleShowZodiacChange}
+          planetaryZodiacPlanets={planetaryZodiacPlanets}
+          onTogglePlanetaryZodiacPlanet={handleTogglePlanetaryZodiacPlanet}
           orbitMode={orbitMode}
           onOrbitModeChange={setOrbitMode}
           onClose={() => setSettingsOpen(false)}

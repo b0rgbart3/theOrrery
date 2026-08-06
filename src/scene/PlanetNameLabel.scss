@@ -43,4 +43,13 @@
       0 0 10px #000000,
       0 0 6px $color-glow;
   }
+
+  &__zodiac {
+    display: block;
+    margin-top: 2px;
+    font-weight: 400;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    opacity: 0.75;
+  }
 }
