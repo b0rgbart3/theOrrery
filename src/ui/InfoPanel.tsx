@@ -161,10 +161,11 @@ export function InfoPanel({ aboutOpen, onAboutOpenChange }: InfoPanelProps) {
               is to make those relationships <strong>visible</strong> and
               animated over time, as a way of seeing and understanding those
               movements rather than just reading about them. That's especially
-              useful for something like retrograde motion — watching it play out
-              visually makes it much easier to understand why, for example,
-              Mercury appears to go retrograde more often than the other planets
-              do.
+              useful for something like retrograde motion — watching it play
+              out visually makes it much easier to understand why a planet
+              would appear to go retrograde in the first place. And why, for
+              example, Mercury appears to go retrograde more often than the
+              other planets do.
             </p>
           </div>
 
